@@ -8,11 +8,11 @@ public class GeneticPathFinder {
     static final int NUM_VERTICES = 2000;
     static final int POPULATION_SIZE = 100;
     static final int GENERATIONS = 100;
-    static final double MUTATION_RATE = 0.05;
+    static final double INITIAL_MUTATION_RATE = 0.1;
     static final int TOURNAMENT_SIZE = 5;
     static final double ELITISM_PERCENTAGE = 0.1;
     static final int MAX_STAGNATION = 100;
-    static final double CHANCE_EDGE_EXIXTS = 0.2;
+    static final double CHANCE_EDGE_EXISTS = 0.2;
 
     static int[][] graph = new int[NUM_VERTICES][NUM_VERTICES];
     static Random rand = new Random();
@@ -28,6 +28,7 @@ public class GeneticPathFinder {
         int bestCost = Integer.MAX_VALUE;
         int stagnationCounter = 0;
         List<Integer> bestPath = population.get(0);
+        double mutationRate = INITIAL_MUTATION_RATE;
 
         for (int gen = 0; gen < GENERATIONS; gen++) {
             List<List<Integer>> newPopulation = new ArrayList<>();
@@ -38,7 +39,7 @@ public class GeneticPathFinder {
                 List<Integer> parent1 = tournamentSelection(population);
                 List<Integer> parent2 = tournamentSelection(population);
                 List<Integer> child = crossover(parent1, parent2, start, end);
-                if (rand.nextDouble() < MUTATION_RATE) {
+                if (rand.nextDouble() < mutationRate) {
                     mutate(child, start, end);
                 }
                 newPopulation.add(child);
@@ -48,40 +49,32 @@ public class GeneticPathFinder {
             population.sort(Comparator.comparingInt(GeneticPathFinder::fitness));
 
             int currentBestCost = fitness(population.get(0));
+            System.out.println("Generation " + gen + " best cost: " + currentBestCost);
+
             if (currentBestCost < bestCost) {
                 bestCost = currentBestCost;
                 bestPath = population.get(0);
                 stagnationCounter = 0;
-                System.out.println("Generation " + gen + " best cost " + bestCost);
+                mutationRate = INITIAL_MUTATION_RATE; // скидаємо мутацію
             } else {
                 stagnationCounter++;
+                mutationRate = Math.min(0.5, mutationRate * 1.05); // поступово підвищуємо
             }
 
-//            if (stagnationCounter >= MAX_STAGNATION) {
-//                System.out.println("Terminating due to stagnation at generation " + gen);
-//                break;
-//            }
+            if (stagnationCounter >= MAX_STAGNATION) {
+                System.out.println("Terminating due to stagnation at generation " + gen);
+                break;
+            }
         }
 
         System.out.println("Best path: " + bestPath + " | Cost: " + bestCost);
-        //System.out.println("Route details:");
-        for (int i = 0; i < bestPath.size() - 1; i++) {
-            int from = bestPath.get(i);
-            int to = bestPath.get(i + 1);
-            int weight = graph[from][to];
-            //System.out.println(from + " -> " + to + " (weight: " + weight + ")");
-        }
-
-//        GraphVisualizer visualizer = new GraphVisualizer(graph);
-//        visualizer.showGraph(bestPath);
     }
 
-    // --------- STEP 1: Generate Graph and Save to File -----------
     static void generateGraphInput(String filename) throws IOException {
         BufferedWriter writer = new BufferedWriter(new FileWriter(filename));
         for (int i = 0; i < NUM_VERTICES; i++) {
             for (int j = 0; j < NUM_VERTICES; j++) {
-                if (i != j && rand.nextDouble() < CHANCE_EDGE_EXIXTS) { // 70% chance edge exists
+                if (i != j && rand.nextDouble() < CHANCE_EDGE_EXISTS) {
                     int weight = rand.nextInt(5) + 1;
                     writer.write(i + " " + j + " " + weight + "\n");
                 }
@@ -90,10 +83,8 @@ public class GeneticPathFinder {
         writer.close();
     }
 
-
     static void loadGraph(String filename) throws IOException {
-        for (int[] row : graph)
-            Arrays.fill(row, 0);
+        for (int[] row : graph) Arrays.fill(row, 0);
         BufferedReader reader = new BufferedReader(new FileReader(filename));
         String line;
         while ((line = reader.readLine()) != null) {
@@ -155,24 +146,43 @@ public class GeneticPathFinder {
     }
 
     static List<Integer> crossover(List<Integer> p1, List<Integer> p2, int start, int end) {
+        Set<Integer> used = new HashSet<>();
         List<Integer> child = new ArrayList<>();
-        int crossoverPoint = rand.nextInt(Math.min(p1.size(), p2.size()) - 1) + 1;
-        child.addAll(p1.subList(0, crossoverPoint));
+        child.add(start);
+        used.add(start);
+
+        int i = 1;
+        while (i < p1.size() && p1.get(i) != end) {
+            int candidate = p1.get(i);
+            if (!used.contains(candidate)) {
+                child.add(candidate);
+                used.add(candidate);
+            }
+            i++;
+        }
+
         for (int node : p2) {
-            if (!child.contains(node) && node != start) {
+            if (!used.contains(node) && node != start) {
                 child.add(node);
+                used.add(node);
             }
             if (node == end) break;
         }
+
         if (!child.contains(end)) child.add(end);
         return child;
     }
 
     static void mutate(List<Integer> path, int start, int end) {
-        if (path.size() > 2) {
+        if (path.size() > 3) {
             int i = rand.nextInt(path.size() - 2) + 1;
             int j = rand.nextInt(path.size() - 2) + 1;
-            Collections.swap(path, i, j);
+            if (i > j) {
+                int temp = i;
+                i = j;
+                j = temp;
+            }
+            Collections.reverse(path.subList(i, j));
         }
     }
 }

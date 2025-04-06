@@ -19,6 +19,10 @@ public class Main {
         long endTimeParallel = System.nanoTime();
         long durationParallel = (endTimeParallel - startTimeParallel) / 1_000_000;
         System.out.println("Execution Time (Parallel): " + durationParallel + " ms");
+
+        // Обчислення прискорення
+        double speedup = (double) durationSeq / durationParallel;
+        System.out.println("Speedup: " + speedup);
     }
 
 }

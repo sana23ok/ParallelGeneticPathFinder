@@ -14,7 +14,7 @@ public class ParallelGeneticPathFinder {
     static final int TOURNAMENT_SIZE = 5;
     static final double ELITISM_PERCENTAGE = 0.1;
     static final int MAX_STAGNATION = 100;
-    static final double CHANCE_EDGE_EXIXTS = 0.2;
+    static final double CHANCE_EDGE_EXISTS = 0.2;
 
     static int[][] graph = new int[NUM_VERTICES][NUM_VERTICES];
     static Random rand = new Random();
@@ -64,10 +64,10 @@ public class ParallelGeneticPathFinder {
                 stagnationCounter++;
             }
 
-//            if (stagnationCounter >= MAX_STAGNATION) {
-//                System.out.println("Terminating due to stagnation at generation " + gen);
-//                break;
-//            }
+            if (stagnationCounter >= MAX_STAGNATION) {
+                System.out.println("Terminating due to stagnation at generation " + gen);
+                break;
+            }
         }
 
         System.out.println("Best path: " + bestPath + " | Cost: " + bestCost);
@@ -81,7 +81,7 @@ public class ParallelGeneticPathFinder {
         BufferedWriter writer = new BufferedWriter(new FileWriter(filename));
         for (int i = 0; i < NUM_VERTICES; i++) {
             for (int j = 0; j < NUM_VERTICES; j++) {
-                if (i != j && rand.nextDouble() < CHANCE_EDGE_EXIXTS) { // 70% chance edge exists
+                if (i != j && rand.nextDouble() < CHANCE_EDGE_EXISTS) { // 70% chance edge exists
                     int weight = rand.nextInt(5) + 1;
                     writer.write(i + " " + j + " " + weight + "\n");
                 }
