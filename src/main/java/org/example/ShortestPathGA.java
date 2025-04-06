@@ -5,15 +5,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import static org.example.Constants.*;
 
 public class ShortestPathGA {
-
-    private static final int NUM_NODES = 1000;
-    private static final double CHANCE_EDGE_EXISTS = 0.3;
-    private static final int POPULATION_SIZE = 100;
-    private static final int GENERATIONS = 100;
-    private static final double MUTATION_RATE = 0.05;
-    private static final int TOURNAMENT_SIZE = 5;
 
     private final int[][] graph; // Матриця суміжності графа
     private final int startNode = 0; // Початкова вершина
@@ -30,7 +24,7 @@ public class ShortestPathGA {
         for (int i = 0; i < GENERATIONS; i++) {
             population = createNextGeneration(population);
             // Додано виведення ваги найкращого шляху на кожному поколінні
-            System.out.println("Generation " + (i + 1) + ", Best Fitness: " + calculateFitness(getBestPath(population)));
+            //System.out.println("Generation " + (i + 1) + ", Best Fitness: " + calculateFitness(getBestPath(population)));
         }
         return getBestPath(population);
     }
@@ -191,10 +185,10 @@ public class ShortestPathGA {
         reader.close();
     }
 
-    public static void main(String[] args) {
+    public static void run() {
         String filename = "graph.txt";
         try {
-            generateGraphInput(filename);
+            //generateGraphInput(filename);
             int[][] graph = new int[NUM_NODES][NUM_NODES];
             loadGraph(filename, graph);
 
