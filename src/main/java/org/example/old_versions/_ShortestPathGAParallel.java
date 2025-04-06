@@ -1,10 +1,16 @@
-package org.example;
+package org.example.old_versions;
 
-import java.util.*;
+import org.example.GraphVisualizer;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.*;
+
 import static org.example.Constants.*;
 
-public class ShortestPathGAParallel {
+public class _ShortestPathGAParallel {
 
     private final int[][] graph; // Матриця суміжності графа
     private final int startNode = 0; // Початкова вершина
@@ -12,11 +18,10 @@ public class ShortestPathGAParallel {
     private final Random random;
     private final ExecutorService executor; // Пул потоків
 
-    public ShortestPathGAParallel(int[][] graph) {
+    public _ShortestPathGAParallel(int[][] graph) {
         this.graph = graph;
         this.random = new Random();
         this.executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-        //System.out.println("Number of processors: " + Runtime.getRuntime().availableProcessors());
     }
 
     public List<Integer> findShortestPath() {
@@ -191,7 +196,7 @@ public class ShortestPathGAParallel {
 //            int[][] graph = new int[NUM_NODES][NUM_NODES];
 //            loadGraph(filename, graph);
 
-        ShortestPathGAParallel ga = new ShortestPathGAParallel(graph);
+        _ShortestPathGAParallel ga = new _ShortestPathGAParallel(graph);
         List<Integer> shortestPath = ga.findShortestPath();
 
         System.out.println("Shortest path: " + shortestPath);
