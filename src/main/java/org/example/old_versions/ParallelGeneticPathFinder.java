@@ -1,9 +1,8 @@
-package org.example;
+package org.example.old_versions;
 
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.stream.*;
 
 public class ParallelGeneticPathFinder {
 

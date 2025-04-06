@@ -1,11 +1,9 @@
 package org.example;
 
-import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import static org.example.Constants.*;
-import static org.example.GraphUtils.*;
 
 public class ShortestPathGA {
 
@@ -158,26 +156,21 @@ public class ShortestPathGA {
     }
 
 
-    public static void run() {
-        String filename = "graph.txt";
-        try {
-            generateGraphInput(filename);
-            int[][] graph = new int[NUM_NODES][NUM_NODES];
-            loadGraph(filename, graph);
+    public static void run(int[][] graph) {
+//        String filename = "graph.txt";
+//            generateGraphInput(filename);
+//            int[][] graph = new int[NUM_NODES][NUM_NODES];
+//            loadGraph(filename, graph);
+        ShortestPathGA ga = new ShortestPathGA(graph);
+        List<Integer> shortestPath = ga.findShortestPath();
 
-            ShortestPathGA ga = new ShortestPathGA(graph);
-            List<Integer> shortestPath = ga.findShortestPath();
+        System.out.println("Shortest path: " + shortestPath);
+        System.out.println("Fitness: " + ga.calculateFitness(shortestPath));
 
-            System.out.println("Shortest path: " + shortestPath);
-            System.out.println("Fitness: " + ga.calculateFitness(shortestPath));
-
-            if(NUM_NODES <= 20){
-                GraphVisualizer visualizer = new GraphVisualizer(graph);
-                visualizer.showGraph(shortestPath);
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
+        if(NUM_NODES <= 20){
+            GraphVisualizer visualizer = new GraphVisualizer(graph);
+            visualizer.showGraph(shortestPath);
         }
+
     }
 }

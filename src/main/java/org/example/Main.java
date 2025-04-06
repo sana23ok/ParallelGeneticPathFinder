@@ -1,54 +1,48 @@
 package org.example;
 
 import java.io.IOException;
-import java.util.List;
+import static org.example.Constants.NUM_NODES;
+import static org.example.GraphUtils.*;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Main {
-    public static void main(String[] args) throws IOException, IOException {
-        // Вимірювання часу для ShortestPathGA (без паралельності)
-        long startTimeGA = System.nanoTime();
-        ShortestPathGA.run();
-        long endTimeGA = System.nanoTime();
-        long durationGA = endTimeGA - startTimeGA;
+    public static void main(String[] args) {
+        String filename = "graph.txt";
+        try {
+            // Generate graph input file
+            generateGraphInput(filename);
 
-        // Вимірювання часу для ShortestPathGAParallel (з паралельністю)
-        long startTimeGAParallel = System.nanoTime();
-        ShortestPathGAParallel.run();
-        long endTimeGAParallel = System.nanoTime();
-        long durationGAParallel = endTimeGAParallel - startTimeGAParallel;
+            // Load graph into memory
+            int[][] graph = new int[NUM_NODES][NUM_NODES];
+            loadGraph(filename, graph);
 
-        // Виведення результатів
-        System.out.println("Time for ShortestPathGA: " + durationGA + " ns");
-        System.out.println("Time for ShortestPathGAParallel: " + durationGAParallel + " ns");
+            // Measure execution time for ShortestPathGA (non-parallel)
+            long startTimeGA = System.nanoTime();
+            ShortestPathGA.run(graph);
+            long endTimeGA = System.nanoTime();
+            long durationGA = endTimeGA - startTimeGA;
 
-        // Обчислення прискорення
-        if (durationGA != 0) {
-            double speedup = (double) durationGA / durationGAParallel;
-            System.out.println("Speedup: " + speedup);
-        } else {
-            System.out.println("Time for ShortestPathGA is too small to calculate speedup.");
+            // Measure execution time for ShortestPathGAParallel (parallel)
+            long startTimeGAParallel = System.nanoTime();
+            ShortestPathGAParallel.run(graph);
+            long endTimeGAParallel = System.nanoTime();
+            long durationGAParallel = endTimeGAParallel - startTimeGAParallel;
+
+            // Output results
+            System.out.println("Time for Sequential: " + durationGA + " ns");
+            System.out.println("Time for Parallel: " + durationGAParallel + " ns");
+
+            // Calculate speedup
+            if (durationGA != 0) {
+                double speedup = (double) durationGA / durationGAParallel;
+                System.out.println("Speedup: " + speedup);
+            } else {
+                System.out.println("Time for Sequential ShortestPathGA is too small to calculate speedup.");
+            }
+
+        } catch (IOException e) {
+            System.err.println("Error occurred while handling the graph file: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("An unexpected error occurred: " + e.getMessage());
         }
-
-
-//        long startTimeSeq = System.nanoTime();
-//        // Виконання для звичайної версії
-//        GeneticPathFinder.main(args);
-//        long endTimeSeq = System.nanoTime();
-//        long durationSeq = (endTimeSeq - startTimeSeq) / 1_000_000;
-//        System.out.println("Execution Time (Sequential): " + durationSeq + " ms");
-//
-//        long startTimeParallel = System.nanoTime();
-//        // Виконання для розпаралеленої версії
-//        ParallelGeneticPathFinder.main(args);
-//        long endTimeParallel = System.nanoTime();
-//        long durationParallel = (endTimeParallel - startTimeParallel) / 1_000_000;
-//        System.out.println("Execution Time (Parallel): " + durationParallel + " ms");
-//
-//        // Обчислення прискорення
-//        double speedup = (double) durationSeq / durationParallel;
-//        System.out.println("Speedup: " + speedup);
     }
-
 }
