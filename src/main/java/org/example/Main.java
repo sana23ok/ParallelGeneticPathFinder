@@ -39,6 +39,20 @@ public class Main {
                 System.out.println("Time for Sequential ShortestPathGA is too small to calculate speedup.");
             }
 
+            // Measure execution time for ShortestPathGAParallel (parallel)
+            long startTimeGAParallel1 = System.nanoTime();
+            ShortestPathGAParallel1.run(graph);
+            long endTimeGAParallel1 = System.nanoTime();
+            long durationGAParallel1 = endTimeGAParallel1 - startTimeGAParallel1;
+
+            // Calculate speedup
+            if (durationGA != 0) {
+                double speedup = (double) durationGA / durationGAParallel1;
+                System.out.println("Speedup1: " + speedup);
+            } else {
+                System.out.println("Time for Sequential ShortestPathGA is too small to calculate speedup.");
+            }
+
         } catch (IOException e) {
             System.err.println("Error occurred while handling the graph file: " + e.getMessage());
         } catch (Exception e) {

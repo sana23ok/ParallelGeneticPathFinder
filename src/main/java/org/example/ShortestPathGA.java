@@ -164,7 +164,7 @@ public class ShortestPathGA {
         ShortestPathGA ga = new ShortestPathGA(graph);
         List<Integer> shortestPath = ga.findShortestPath();
 
-        System.out.println("Shortest path: " + shortestPath);
+        //System.out.println("Shortest path: " + shortestPath);
         System.out.println("Fitness: " + ga.calculateFitness(shortestPath));
 
         if(NUM_NODES <= 20){
