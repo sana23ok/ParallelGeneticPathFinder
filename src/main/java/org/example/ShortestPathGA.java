@@ -22,7 +22,7 @@ public class ShortestPathGA {
         for (int i = 0; i < GENERATIONS; i++) {
             population = createNextGeneration(population);
             // Додано виведення ваги найкращого шляху на кожному поколінні
-            //System.out.println("Generation " + (i + 1) + ", Best Fitness: " + calculateFitness(getBestPath(population)));
+            System.out.println("Generation " + (i + 1) + ", Best Fitness: " + calculateFitness(getBestPath(population)));
         }
         return getBestPath(population);
     }
