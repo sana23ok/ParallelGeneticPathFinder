@@ -1,5 +1,7 @@
 package org.example;
 
+import org.example.island.ShortestPathGAIsland;
+
 import java.io.IOException;
 import static org.example.Constants.NUM_NODES;
 import static org.example.GraphUtils.*;
@@ -38,6 +40,7 @@ public class Main {
             } else {
                 System.out.println("Time for Sequential ShortestPathGA is too small to calculate speedup.");
             }
+            System.out.println("-------------------------------");
 
             // Measure execution time for ShortestPathGAParallel (parallel)
             long startTimeGAParallel1 = System.nanoTime();
@@ -48,7 +51,22 @@ public class Main {
             // Calculate speedup
             if (durationGA != 0) {
                 double speedup = (double) durationGA / durationGAParallel1;
-                System.out.println("Speedup1: " + speedup);
+                System.out.println("Speedup 1: " + speedup);
+            } else {
+                System.out.println("Time for Sequential ShortestPathGA is too small to calculate speedup.");
+            }
+            System.out.println("-------------------------------");
+
+            // Measure execution time for ShortestPathGAParallel (parallel)
+            long startIsland = System.nanoTime();
+            ShortestPathGAIsland.run(graph);
+            long endIsland = System.nanoTime();
+            long durationIsland = endIsland- startIsland;
+
+            // Calculate speedup
+            if (durationGA != 0) {
+                double speedup = (double) durationGA / durationIsland;
+                System.out.println("Speedup Island: " + speedup);
             } else {
                 System.out.println("Time for Sequential ShortestPathGA is too small to calculate speedup.");
             }

@@ -28,7 +28,7 @@ public class ShortestPathGAParallel1 {
                     .map(Map.Entry::getKey)
                     .orElse(null);
             int fitness = evaluated.get(best);
-            System.out.println("Generation " + (i + 1) + ", Best Fitness: " + fitness);
+            //System.out.println("Generation " + (i + 1) + ", Best Fitness: " + fitness);
         }
         executor.shutdown();
         return getBestPath(population);
