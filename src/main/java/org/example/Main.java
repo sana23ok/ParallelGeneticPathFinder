@@ -11,7 +11,7 @@ public class Main {
         String filename = "graph.txt";
         try {
             // Generate graph input file
-            generateGraphInput(filename);
+            //generateGraphInput(filename);
 
             // Load graph into memory
             int[][] graph = new int[NUM_NODES][NUM_NODES];
@@ -23,53 +23,54 @@ public class Main {
             long endTimeGA = System.nanoTime();
             long durationGA = endTimeGA - startTimeGA;
 
-            // Measure execution time for ShortestPathGAParallel (parallel)
-            long startTimeGAParallel = System.nanoTime();
-            ShortestPathGAParallel.run(graph);
-            long endTimeGAParallel = System.nanoTime();
-            long durationGAParallel = endTimeGAParallel - startTimeGAParallel;
-
-            // Output results
             System.out.println("Time for Sequential: " + durationGA + " ns");
-            System.out.println("Time for Parallel: " + durationGAParallel + " ns");
 
-            // Calculate speedup
-            if (durationGA != 0) {
-                double speedup = (double) durationGA / durationGAParallel;
-                System.out.println("Speedup: " + speedup);
-            } else {
-                System.out.println("Time for Sequential ShortestPathGA is too small to calculate speedup.");
-            }
-            System.out.println("-------------------------------");
-
-            // Measure execution time for ShortestPathGAParallel (parallel)
-            long startTimeGAParallel1 = System.nanoTime();
-            ShortestPathGAParallel1.run(graph);
-            long endTimeGAParallel1 = System.nanoTime();
-            long durationGAParallel1 = endTimeGAParallel1 - startTimeGAParallel1;
-
-            // Calculate speedup
-            if (durationGA != 0) {
-                double speedup = (double) durationGA / durationGAParallel1;
-                System.out.println("Speedup 1: " + speedup);
-            } else {
-                System.out.println("Time for Sequential ShortestPathGA is too small to calculate speedup.");
-            }
-            System.out.println("-------------------------------");
-
-            // Measure execution time for ShortestPathGAParallel (parallel)
-            long startIsland = System.nanoTime();
-            ShortestPathGAIsland.run(graph);
-            long endIsland = System.nanoTime();
-            long durationIsland = endIsland- startIsland;
-
-            // Calculate speedup
-            if (durationGA != 0) {
-                double speedup = (double) durationGA / durationIsland;
-                System.out.println("Speedup Island: " + speedup);
-            } else {
-                System.out.println("Time for Sequential ShortestPathGA is too small to calculate speedup.");
-            }
+//            // Measure execution time for ShortestPathGAParallel (parallel)
+//            long startTimeGAParallel = System.nanoTime();
+//            ShortestPathGAParallel.run(graph);
+//            long endTimeGAParallel = System.nanoTime();
+//            long durationGAParallel = endTimeGAParallel - startTimeGAParallel;
+//
+//            // Output results
+//            System.out.println("Time for Parallel: " + durationGAParallel + " ns");
+//
+//            // Calculate speedup
+//            if (durationGA != 0) {
+//                double speedup = (double) durationGA / durationGAParallel;
+//                System.out.println("Speedup: " + speedup);
+//            } else {
+//                System.out.println("Time for Sequential ShortestPathGA is too small to calculate speedup.");
+//            }
+//            System.out.println("-------------------------------");
+//
+//            // Measure execution time for ShortestPathGAParallel (parallel)
+//            long startTimeGAParallel1 = System.nanoTime();
+//            ShortestPathGAParallel1.run(graph);
+//            long endTimeGAParallel1 = System.nanoTime();
+//            long durationGAParallel1 = endTimeGAParallel1 - startTimeGAParallel1;
+//
+//            // Calculate speedup
+//            if (durationGA != 0) {
+//                double speedup = (double) durationGA / durationGAParallel1;
+//                System.out.println("Speedup 1: " + speedup);
+//            } else {
+//                System.out.println("Time for Sequential ShortestPathGA is too small to calculate speedup.");
+//            }
+//            System.out.println("-------------------------------");
+//
+//            // Measure execution time for ShortestPathGAParallel (parallel)
+//            long startIsland = System.nanoTime();
+//            ShortestPathGAIsland.run(graph);
+//            long endIsland = System.nanoTime();
+//            long durationIsland = endIsland- startIsland;
+//
+//            // Calculate speedup
+//            if (durationGA != 0) {
+//                double speedup = (double) durationGA / durationIsland;
+//                System.out.println("Speedup Island: " + speedup);
+//            } else {
+//                System.out.println("Time for Sequential ShortestPathGA is too small to calculate speedup.");
+//            }
 
         } catch (IOException e) {
             System.err.println("Error occurred while handling the graph file: " + e.getMessage());

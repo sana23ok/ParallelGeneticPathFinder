@@ -12,7 +12,7 @@ class Island {
     private final int startNode = 0;
     private final int endNode = NUM_NODES / 2 + 1;
     private final Random random = new Random();
-    private final List<List<Integer>> population = new ArrayList<>();
+    private final List<List<Integer>> population = Collections.synchronizedList(new ArrayList<>());
     private final Map<List<Integer>, Integer> fitnessCache = new ConcurrentHashMap<>();
 
     public Island(int[][] graph) {
@@ -20,7 +20,7 @@ class Island {
         initializePopulation();
     }
 
-    private void initializePopulation() {
+    private synchronized void initializePopulation() {
         while (population.size() < POPULATION_SIZE / Runtime.getRuntime().availableProcessors()) {
             List<Integer> path = generateRandomPath();
             if (isValidPath(path)) {
@@ -29,7 +29,7 @@ class Island {
         }
     }
 
-    public void evolve() {
+    public synchronized void evolve() {
         Map<List<Integer>, Integer> evaluated = evaluatePopulation(population);
         List<List<Integer>> nextGeneration = new ArrayList<>();
 
@@ -45,20 +45,20 @@ class Island {
         population.addAll(nextGeneration);
     }
 
-    public List<List<Integer>> getBestIndividuals(int count) {
+    public synchronized List<List<Integer>> getBestIndividuals(int count) {
         return population.stream()
                 .sorted(Comparator.comparingInt(this::calculateFitness))
                 .limit(count)
                 .collect(Collectors.toList());
     }
 
-    public void addMigrants(List<List<Integer>> migrants) {
+    public synchronized void addMigrants(List<List<Integer>> migrants) {
         for (List<Integer> migrant : migrants) {
             population.set(random.nextInt(population.size()), migrant);
         }
     }
 
-    public List<Integer> getBestPath() {
+    public synchronized List<Integer> getBestPath() {
         return population.stream()
                 .min(Comparator.comparingInt(this::calculateFitness))
                 .orElse(null);
@@ -149,4 +149,3 @@ class Island {
         });
     }
 }
-

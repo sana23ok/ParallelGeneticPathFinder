@@ -196,6 +196,7 @@ public class ShortestPathGAParallel {
 
         //System.out.println("Shortest path: " + shortestPath);
         System.out.println("Fitness: " + ga.calculateFitness(shortestPath));
+        System.out.println("Shortest path: " + shortestPath);
 
         if (NUM_NODES <= 20) {
             GraphVisualizer visualizer = new GraphVisualizer(graph);
