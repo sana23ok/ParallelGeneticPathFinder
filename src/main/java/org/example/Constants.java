@@ -1,11 +1,11 @@
 package org.example;
 
 public class Constants {
-    public static final int NUM_NODES = 10;
-    public static final double CHANCE_EDGE_EXISTS = 0.3;
-    public static final int POPULATION_SIZE = 100;
-    public static final int GENERATIONS = 100;
-    public static final double MUTATION_RATE = 0.05;
-    public static final int TOURNAMENT_SIZE = 5;
+    public static int NUM_NODES = 7000;
+    public static double CHANCE_EDGE_EXISTS = 0.4;
+    public static int POPULATION_SIZE = 100;
+    public static int GENERATIONS = 100;
+    public static double MUTATION_RATE = 0.05;
+    public static int TOURNAMENT_SIZE = 5;
 }
 
