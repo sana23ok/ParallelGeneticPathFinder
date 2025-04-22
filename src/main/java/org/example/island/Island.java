@@ -2,6 +2,9 @@ package org.example.island;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ForkJoinPool;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -12,53 +15,67 @@ class Island {
     private final int startNode = 0;
     private final int endNode = NUM_NODES / 2 + 1;
     private final Random random = new Random();
-    private final List<List<Integer>> population = Collections.synchronizedList(new ArrayList<>());
-    private final Map<List<Integer>, Integer> fitnessCache = new ConcurrentHashMap<>();
+    private final List<List<Integer>> population;
+    private final ConcurrentMap<List<Integer>, Integer> fitnessCache = new ConcurrentHashMap<>();
 
     public Island(int[][] graph) {
         this.graph = graph;
-        initializePopulation();
+        this.population = new CopyOnWriteArrayList<>();
+        initializePopulationParallel();
     }
 
-    private synchronized void initializePopulation() {
-        while (population.size() < POPULATION_SIZE / Runtime.getRuntime().availableProcessors()) {
-            List<Integer> path = generateRandomPath();
-            if (isValidPath(path)) {
-                population.add(path);
+    // Паралельна ініціалізація популяції
+    private void initializePopulationParallel() {
+        int targetSize = POPULATION_SIZE / Runtime.getRuntime().availableProcessors();
+
+        ForkJoinPool.commonPool().submit(() -> IntStream.range(0, targetSize).parallel().forEach(i -> {
+            while (true) {
+                List<Integer> path = generateRandomPath();
+                if (isValidPath(path)) {
+                    population.add(path);
+                    break;
+                }
             }
-        }
+        })).join();
     }
 
-    public synchronized void evolve() {
-        Map<List<Integer>, Integer> evaluated = evaluatePopulation(population);
-        List<List<Integer>> nextGeneration = new ArrayList<>();
+    public void evolve() {
+        List<List<Integer>> nextGeneration = Collections.synchronizedList(new ArrayList<>());
+        evaluatePopulation(); // Оновлює кеш
 
-        while (nextGeneration.size() < population.size()) {
-            List<Integer> parent1 = tournamentSelection();
-            List<Integer> parent2 = tournamentSelection();
-            List<Integer> child = crossover(parent1, parent2);
-            mutate(child);
-            nextGeneration.add(isValidPath(child) ? child : parent1);
-        }
+        ForkJoinPool.commonPool().submit(() ->
+                IntStream.range(0, population.size()).parallel().forEach(i -> {
+                    List<Integer> parent1 = tournamentSelection();
+                    List<Integer> parent2 = tournamentSelection();
+                    List<Integer> child = crossover(parent1, parent2);
+                    mutate(child);
+                    if (isValidPath(child)) {
+                        nextGeneration.add(child);
+                    } else {
+                        nextGeneration.add(parent1);
+                    }
+                })
+        ).join();
 
         population.clear();
         population.addAll(nextGeneration);
     }
 
-    public synchronized List<List<Integer>> getBestIndividuals(int count) {
+    public List<List<Integer>> getBestIndividuals(int count) {
         return population.stream()
                 .sorted(Comparator.comparingInt(this::calculateFitness))
                 .limit(count)
                 .collect(Collectors.toList());
     }
 
-    public synchronized void addMigrants(List<List<Integer>> migrants) {
+    public void addMigrants(List<List<Integer>> migrants) {
         for (List<Integer> migrant : migrants) {
-            population.set(random.nextInt(population.size()), migrant);
+            int index = random.nextInt(population.size());
+            population.set(index, migrant);
         }
     }
 
-    public synchronized List<Integer> getBestPath() {
+    public List<Integer> getBestPath() {
         return population.stream()
                 .min(Comparator.comparingInt(this::calculateFitness))
                 .orElse(null);
@@ -97,20 +114,15 @@ class Island {
         return true;
     }
 
-    private Map<List<Integer>, Integer> evaluatePopulation(List<List<Integer>> population) {
-        return population.parallelStream()
-                .collect(Collectors.toConcurrentMap(
-                        path -> path,
-                        this::calculateFitness,
-                        (v1, v2) -> v1
-                ));
+    private void evaluatePopulation() {
+        population.parallelStream().forEach(this::calculateFitness);
     }
 
     private List<Integer> tournamentSelection() {
         return IntStream.range(0, TOURNAMENT_SIZE)
                 .mapToObj(i -> population.get(random.nextInt(population.size())))
                 .min(Comparator.comparingInt(this::calculateFitness))
-                .orElse(null);
+                .orElse(population.get(0)); // fallback
     }
 
     private List<Integer> crossover(List<Integer> parent1, List<Integer> parent2) {
@@ -149,3 +161,4 @@ class Island {
         });
     }
 }
+

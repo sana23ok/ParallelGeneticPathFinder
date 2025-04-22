@@ -14,8 +14,8 @@ public class ShortestPathGAIsland {
     private final Random random = new Random();
 
     private final int numIslands = Runtime.getRuntime().availableProcessors();
-    private final int migrationInterval = 10;
-    private final int migrantsCount = 2;
+    private final int migrationInterval = 20;
+    private final int migrantsCount = 3;
 
     public ShortestPathGAIsland(int[][] graph) {
         this.graph = graph;
