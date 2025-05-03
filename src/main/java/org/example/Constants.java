@@ -1,7 +1,7 @@
 package org.example;
 
 public class Constants {
-    public static int NUM_NODES = 5000;
+    public static int NUM_NODES = 3000;
     public static double CHANCE_EDGE_EXISTS = 0.4;
     public static int POPULATION_SIZE = 100;
     public static int GENERATIONS = 100;

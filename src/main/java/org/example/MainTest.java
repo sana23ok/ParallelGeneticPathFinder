@@ -3,6 +3,7 @@ package org.example;
 import java.io.IOException;
 
 import static org.example.GraphUtils.*;
+import org.example.islandSequential.ShortestPathGAIslandSequential;
 
 
 public class MainTest {
@@ -19,9 +20,9 @@ public class MainTest {
             int[][] graph = new int[Constants.NUM_NODES][Constants.NUM_NODES];
             loadGraph(filename, graph);
 
-            // Вимірювання часу виконання для ShortestPathGA
+            // Вимірювання часу виконання для ShortestPathGAIslandSequential
             long startTimeGA = System.nanoTime();
-            ShortestPathGA.run(graph);
+            ShortestPathGAIslandSequential.run(graph);
             long endTimeGA = System.nanoTime();
             long durationGA = endTimeGA - startTimeGA;
 
@@ -45,9 +46,9 @@ public class MainTest {
             int[][] graph = new int[Constants.NUM_NODES][Constants.NUM_NODES];
             loadGraph(filename, graph);
 
-            // Вимірювання часу виконання для ShortestPathGA
+            // Вимірювання часу виконання для ShortestPathGAIslandSequential
             long startTimeGA = System.nanoTime();
-            ShortestPathGA.run(graph);
+            ShortestPathGAIslandSequential.run(graph);
             long endTimeGA = System.nanoTime();
             long durationGA = endTimeGA - startTimeGA;
 
