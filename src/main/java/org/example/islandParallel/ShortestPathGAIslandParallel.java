@@ -68,7 +68,7 @@ public class ShortestPathGAIslandParallel {
         }
     }
 
-    public static void run(int[][] graph) {
+    public static List<Integer> run(int[][] graph) {
         ShortestPathGAIslandParallel ga = new ShortestPathGAIslandParallel(graph);
         List<Integer> shortestPath = ga.findShortestPath();
 
@@ -79,6 +79,7 @@ public class ShortestPathGAIslandParallel {
             GraphVisualizer visualizer = new GraphVisualizer(graph);
             visualizer.showGraph(shortestPath);
         }
+        return shortestPath;
     }
 
     private int calculateFitness(List<Integer> path, int[][] graph) {

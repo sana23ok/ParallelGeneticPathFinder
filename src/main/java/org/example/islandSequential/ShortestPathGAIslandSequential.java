@@ -25,7 +25,7 @@ public class ShortestPathGAIslandSequential {
         return island.getBestPath();
     }
 
-    public static void run(int[][] graph) {
+    public static List<Integer> run(int[][] graph) {
         ShortestPathGAIslandSequential ga = new ShortestPathGAIslandSequential(graph);
         List<Integer> shortestPath = ga.findShortestPath();
 
@@ -36,6 +36,7 @@ public class ShortestPathGAIslandSequential {
             GraphVisualizer visualizer = new GraphVisualizer(graph);
             visualizer.showGraph(shortestPath);
         }
+        return shortestPath;
     }
 
     private int calculateFitness(List<Integer> path) {

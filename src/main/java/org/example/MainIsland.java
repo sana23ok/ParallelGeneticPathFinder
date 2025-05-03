@@ -5,6 +5,8 @@ import org.example.islandParallel.ShortestPathGAIslandParallel;
 import org.example.islandSequential.ShortestPathGAIslandSequential;
 
 import java.io.IOException;
+import java.util.List;
+
 import static org.example.Constants.NUM_NODES;
 import static org.example.GraphUtils.*;
 
@@ -22,18 +24,23 @@ public class MainIsland {
 
                 // Measure execution time for ShortestPathGAParallel (parallel)
                 long startSeqIsland = System.nanoTime();
-                ShortestPathGAIslandSequential.run(graph);
+                List<Integer> seqPath = ShortestPathGAIslandSequential.run(graph);
                 long endSeqIsland = System.nanoTime();
                 long durationSeqIsland = endSeqIsland - startSeqIsland;
+
+                GraphPathChecker checkerSeq = new GraphPathChecker();
+                checkerSeq.check(filename, seqPath);
 
                 System.out.println("Time for Sequential: " + durationSeqIsland + " ns");
 
                 // Measure execution time for ShortestPathGAParallel (parallel)
                 long startIsland = System.nanoTime();
-                ShortestPathGAIslandParallel.run(graph);
+                List<Integer> paralelPath =  ShortestPathGAIslandParallel.run(graph);
                 long endIsland = System.nanoTime();
                 long durationIsland = endIsland - startIsland;
-                //GraphPathChecker checker = new GraphPathChecker();
+
+                GraphPathChecker checkerPar = new GraphPathChecker();
+                checkerPar.check(filename, paralelPath);
 
                 // Calculate speedup
                 if (durationSeqIsland != 0) {
