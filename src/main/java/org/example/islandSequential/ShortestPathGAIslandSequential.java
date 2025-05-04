@@ -1,6 +1,6 @@
 package org.example.islandSequential;
 
-import org.example.GraphVisualizer;
+import org.example.graph.GraphVisualizer;
 
 import java.util.*;
 import static org.example.Constants.*;

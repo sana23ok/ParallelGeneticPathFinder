@@ -1,6 +1,6 @@
 package org.example.old_versions;
 
-import org.example.GraphVisualizer;
+import org.example.graph.GraphVisualizer;
 
 import java.io.*;
 import java.util.*;

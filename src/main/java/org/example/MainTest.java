@@ -1,8 +1,9 @@
 package org.example;
 
 import java.io.IOException;
-
-import static org.example.GraphUtils.*;
+import java.util.List;
+import static org.example.graph.GraphUtils.*;
+import org.example.graph.GraphPathChecker;
 import org.example.islandSequential.ShortestPathGAIslandSequential;
 
 
@@ -22,12 +23,15 @@ public class MainTest {
 
             // Вимірювання часу виконання для ShortestPathGAIslandSequential
             long startTimeGA = System.nanoTime();
-            ShortestPathGAIslandSequential.run(graph);
+            List<Integer> seqPath = ShortestPathGAIslandSequential.run(graph);
             long endTimeGA = System.nanoTime();
             long durationGA = endTimeGA - startTimeGA;
 
             // Переведення часу в мілісекунди
             double durationInMillis = durationGA / 1_000_000.0;
+
+            GraphPathChecker checkerSeq = new GraphPathChecker();
+            checkerSeq.check(filename, seqPath);
 
             // Виведення результату
             System.out.println("Nodes: " + numNodes);
@@ -48,12 +52,15 @@ public class MainTest {
 
             // Вимірювання часу виконання для ShortestPathGAIslandSequential
             long startTimeGA = System.nanoTime();
-            ShortestPathGAIslandSequential.run(graph);
+            List<Integer> seqPath = ShortestPathGAIslandSequential.run(graph);
             long endTimeGA = System.nanoTime();
             long durationGA = endTimeGA - startTimeGA;
 
             // Переведення часу в мілісекунди
             double durationInMillis = durationGA / 1_000_000.0;
+
+            GraphPathChecker checkerSeq = new GraphPathChecker();
+            checkerSeq.check(filename, seqPath);
 
             // Виведення результату
             System.out.println("Nodes: " + numNodes);

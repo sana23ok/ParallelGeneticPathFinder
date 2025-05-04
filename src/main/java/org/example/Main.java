@@ -4,7 +4,7 @@ import org.example.islandParallel.ShortestPathGAIslandParallel;
 
 import java.io.IOException;
 import static org.example.Constants.NUM_NODES;
-import static org.example.GraphUtils.*;
+import static org.example.graph.GraphUtils.*;
 
 public class Main {
     public static void main(String[] args) {

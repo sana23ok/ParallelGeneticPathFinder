@@ -1,4 +1,6 @@
-package org.example;
+package org.example.graph;
+
+import org.example.Constants;
 
 import java.io.*;
 import java.util.*;

@@ -1,6 +1,6 @@
 package org.example.islandParallel;
 
-import org.example.GraphVisualizer;
+import org.example.graph.GraphVisualizer;
 
 import java.util.*;
 import java.util.concurrent.*;

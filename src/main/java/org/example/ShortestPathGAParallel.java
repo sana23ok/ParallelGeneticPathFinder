@@ -1,5 +1,7 @@
 package org.example;
 
+import org.example.graph.GraphVisualizer;
+
 import java.util.*;
 import java.util.concurrent.*;
 import static org.example.Constants.*;

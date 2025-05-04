@@ -1,4 +1,4 @@
-package org.example;
+package org.example.graph;
 
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.implementations.SingleGraph;

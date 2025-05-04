@@ -1,21 +1,9 @@
-package org.example.graphs;
+package org.example.graph;
 
 import java.io.*;
 import java.util.*;
 
 public class GraphPathChecker {
-
-//    public static void main(String[] args) {
-//        // Зчитуємо матрицю суміжності з файлу
-//        int[][] adjacencyMatrix = readAdjacencyMatrix("graph.txt");
-//
-//        // Заданий шлях
-//        int[] path = {0, 1788, 555, 1703, 2886, 1202, 77, 488, 747, 637, 2393, 2898, 15, 1529, 2089, 1685, 1100, 2453, 1334, 1528, 2834, 1501};
-//
-//        // Перевірка шляху
-//        boolean exists = pathExists(adjacencyMatrix, path);
-//        System.out.println("Does path exists? : " + (exists ? "Yes" : "No"));
-//    }
 
     public void check(String fileName, List<Integer> pathF) {
         // Зчитуємо матрицю суміжності з файлу
