@@ -10,8 +10,6 @@ import static org.example.Constants.NUM_NODES;
 public class ShortestPathGAIslandSequential {
 
     private final int[][] graph;
-    private final int startNode = 0;
-    private final int endNode = NUM_NODES / 2 + 1;
 
     public ShortestPathGAIslandSequential(int[][] graph) {
         this.graph = graph;
@@ -32,7 +30,7 @@ public class ShortestPathGAIslandSequential {
         List<Integer> shortestPath = ga.findShortestPath();
 
         System.out.println("Fitness: " + ga.calculateFitness(shortestPath));
-        System.out.println("Shortest path: " + shortestPath);
+        //System.out.println("Shortest path: " + shortestPath);
 
         if (NUM_NODES <= 20) {
             GraphVisualizer visualizer = new GraphVisualizer(graph);

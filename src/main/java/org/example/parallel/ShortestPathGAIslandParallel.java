@@ -5,7 +5,6 @@ import org.example.graph.GraphVisualizer;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -16,10 +15,6 @@ import static org.example.Constants.NUM_NODES;
 public class ShortestPathGAIslandParallel {
 
     private final int[][] graph;
-    private final int startNode = 0;
-    private final int endNode = NUM_NODES / 2 + 1;
-    private final Random random = new Random();
-
     private final int numIslands = Runtime.getRuntime().availableProcessors();
     private final int migrationInterval = 20;
     private final int migrantsCount = 3;
@@ -80,7 +75,7 @@ public class ShortestPathGAIslandParallel {
         List<Integer> shortestPath = ga.findShortestPath();
 
         System.out.println("Fitness: " + ga.calculateFitness(shortestPath, graph));
-        System.out.println("Shortest path: " + shortestPath);
+        //System.out.println("Shortest path: " + shortestPath);
 
         if (NUM_NODES <= 20) {
             GraphVisualizer visualizer = new GraphVisualizer(graph);

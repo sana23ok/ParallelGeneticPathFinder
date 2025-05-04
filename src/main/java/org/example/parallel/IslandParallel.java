@@ -31,6 +31,12 @@ public class IslandParallel extends Island {
     @Override
     protected void initializePopulation() {
         int targetSize = POPULATION_SIZE / Runtime.getRuntime().availableProcessors();
+//        int availableProcessors = Runtime.getRuntime().availableProcessors();
+
+//        System.out.println("[initializePopulation] Available processors: " + availableProcessors);
+//        System.out.println("[initializePopulation] Target population size: " + targetSize);
+//        System.out.println("[initializePopulation] Threads in ForkJoinPool: " + ForkJoinPool.commonPool().getParallelism());
+
 
         ForkJoinPool.commonPool().submit(() -> IntStream.range(0, targetSize).parallel().forEach(i -> {
             while (true) {
@@ -47,6 +53,11 @@ public class IslandParallel extends Island {
     public void evolve() {
         List<List<Integer>> nextGeneration = Collections.synchronizedList(new ArrayList<>());
         evaluatePopulation();
+
+//        System.out.println("[evolve] Starting evolution with population size: " + population.size());
+//        System.out.println("[evolve] Threads in ForkJoinPool: " + ForkJoinPool.commonPool().getParallelism());
+//        System.out.println("[evolve] Total evolve tasks: " + population.size());
+//
 
         ForkJoinPool.commonPool().submit(() ->
                 IntStream.range(0, population.size()).parallel().forEach(i -> {
@@ -82,6 +93,7 @@ public class IslandParallel extends Island {
 
     @Override
     protected void evaluatePopulation() {
+        //System.out.println("[evaluatePopulation] Evaluating " + population.size() + " individuals in parallel...");
         population.parallelStream().forEach(this::calculateFitness);
     }
 
