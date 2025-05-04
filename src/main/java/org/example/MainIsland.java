@@ -42,12 +42,14 @@ public class MainIsland {
                 GraphPathChecker checkerPar = new GraphPathChecker();
                 checkerPar.check(filename, paralelPath);
 
+                System.out.println("Time for Sequential: " + durationIsland + " ns");
+
                 // Calculate speedup
                 if (durationSeqIsland != 0) {
                     double speedup = (double) durationSeqIsland / durationIsland;
-                    System.out.println("Speedup Island: " + speedup);
+                    System.out.println("Speedup: " + speedup);
                 } else {
-                    System.out.println("Time for Sequential ShortestPathGA is too small to calculate speedup.");
+                    System.out.println("Time for Sequential is too small to calculate speedup.");
                 }
 
                 System.out.println("- - - - - - - - - - - - - - - - - - - - ");
