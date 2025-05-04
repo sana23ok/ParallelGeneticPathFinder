@@ -80,4 +80,14 @@ public class Main {
             System.err.println("An unexpected error occurred: " + e.getMessage());
         }
     }
+
+    private static void warmup() {
+        long sum = 0;
+        for (int i = 0; i < 10; i++) {
+            for (long j = 0; j < 10000000000L; j++) {
+                sum += j - (j / 2) * 2;
+            }
+            sum -= sum;
+        }
+    }
 }

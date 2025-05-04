@@ -1,47 +1,36 @@
 package org.example.parallel;
 
 import org.example.graph.GraphVisualizer;
-
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.*;
+import java.util.concurrent.*;
 
 import static org.example.Constants.*;
 
 public class ShortestPathGAIslandParallel {
-
     private final int[][] graph;
 
     public ShortestPathGAIslandParallel(int[][] graph) {
         this.graph = graph;
     }
 
-    public List<Integer> findShortestPath() {
-        ExecutorService executor = Executors.newFixedThreadPool(NUM_ISLANDS);
+    public List<Integer> findShortestPath() throws InterruptedException, ExecutionException {
         List<IslandParallel> islands = new ArrayList<>();
-        //System.out.println("Num of islands: " + numIslands);
-
         for (int i = 0; i < NUM_ISLANDS; i++) {
             islands.add(new IslandParallel(graph));
         }
 
+        ExecutorService executor = Executors.newFixedThreadPool(NUM_ISLANDS);
+
         for (int gen = 0; gen < GENERATIONS; gen++) {
-            List<Callable<Void>> tasks = new ArrayList<>();
+            List<Future<?>> futures = new ArrayList<>();
             for (IslandParallel island : islands) {
-                tasks.add(() -> {
-                    island.evolve();
-                    return null;
-                });
-            }
-            try {
-                executor.invokeAll(tasks);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+                futures.add(executor.submit(island::evolve));
             }
 
+            // Wait for all islands to finish this generation
+            for (Future<?> f : futures) f.get();
+
+            // Migration step
             if (gen > 0 && gen % MIGRATION_INTERVAL == 0) {
                 migrate(islands);
             }
@@ -49,7 +38,7 @@ public class ShortestPathGAIslandParallel {
 
         executor.shutdown();
 
-        // Знаходимо найкращий шлях серед усіх островів
+        // Return best overall path
         return islands.stream()
                 .map(IslandParallel::getBestPath)
                 .min(Comparator.comparingInt(p -> calculateFitness(p, graph)))
@@ -60,32 +49,18 @@ public class ShortestPathGAIslandParallel {
         for (int i = 0; i < islands.size(); i++) {
             IslandParallel source = islands.get(i);
             IslandParallel target = islands.get((i + 1) % islands.size());
-
             List<List<Integer>> migrants = source.getBestIndividuals(MIGRATION_COUNT);
             target.addMigrants(migrants);
         }
     }
 
-
-//    private void migrate(List<IslandParallel> islands) {
-//        islands.parallelStream().forEach(source -> {
-//            IslandParallel target = islands.get((islands.indexOf(source) + 1) % islands.size());
-//            List<List<Integer>> migrants = source.getBestIndividuals(migrantsCount);
-//            target.addMigrants(migrants);
-//        });
-//    }
-
-
-    public static List<Integer> run(int[][] graph) {
+    public static List<Integer> run(int[][] graph) throws InterruptedException, ExecutionException {
         ShortestPathGAIslandParallel ga = new ShortestPathGAIslandParallel(graph);
         List<Integer> shortestPath = ga.findShortestPath();
 
         System.out.println("Fitness: " + ga.calculateFitness(shortestPath, graph));
-        //System.out.println("Shortest path: " + shortestPath);
-
         if (NUM_NODES <= 20) {
-            GraphVisualizer visualizer = new GraphVisualizer(graph);
-            visualizer.showGraph(shortestPath);
+            new GraphVisualizer(graph).showGraph(shortestPath);
         }
         return shortestPath;
     }
