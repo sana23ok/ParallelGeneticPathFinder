@@ -32,11 +32,15 @@ public class IslandParallel extends Island {
     protected void initializePopulation() {
         int targetSize = POPULATION_SIZE / Runtime.getRuntime().availableProcessors();
 //        int availableProcessors = Runtime.getRuntime().availableProcessors();
-
+//
 //        System.out.println("[initializePopulation] Available processors: " + availableProcessors);
 //        System.out.println("[initializePopulation] Target population size: " + targetSize);
 //        System.out.println("[initializePopulation] Threads in ForkJoinPool: " + ForkJoinPool.commonPool().getParallelism());
-
+//
+//        int numThreads = Runtime.getRuntime().availableProcessors();
+//        int tasksPerThread = targetSize / numThreads;
+//
+//        System.out.println(tasksPerThread);
 
         ForkJoinPool.commonPool().submit(() -> IntStream.range(0, targetSize).parallel().forEach(i -> {
             while (true) {
@@ -57,7 +61,19 @@ public class IslandParallel extends Island {
 //        System.out.println("[evolve] Starting evolution with population size: " + population.size());
 //        System.out.println("[evolve] Threads in ForkJoinPool: " + ForkJoinPool.commonPool().getParallelism());
 //        System.out.println("[evolve] Total evolve tasks: " + population.size());
+
+//        // Визначення кількості потоків
+//        int numThreads = Runtime.getRuntime().availableProcessors();
 //
+//        // Оновлення обчислення кількості задач на потік з використанням population.size()
+//        int tasksPerThread = population.size() / numThreads;
+//
+//        // Якщо залишаються неповні задачі, то додатково одна задача може бути на деякі потоки
+//        if (population.size() % numThreads != 0) {
+//            tasksPerThread++;
+//        }
+//
+//        System.out.println("Tasks per thread: " + tasksPerThread);
 
         ForkJoinPool.commonPool().submit(() ->
                 IntStream.range(0, population.size()).parallel().forEach(i -> {

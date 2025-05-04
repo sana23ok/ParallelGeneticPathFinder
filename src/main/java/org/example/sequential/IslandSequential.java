@@ -1,12 +1,7 @@
 package org.example.sequential;
 
 import org.example.Island;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import java.util.*;
 import static org.example.Constants.POPULATION_SIZE;
 
 public class IslandSequential extends Island {
@@ -54,5 +49,19 @@ public class IslandSequential extends Island {
 
         population.clear();
         population.addAll(nextGeneration);
+    }
+
+    public List<List<Integer>> getBestIndividuals(int count) {
+        return population.stream()
+                .sorted(Comparator.comparingInt(this::calculateFitness))
+                .limit(count)
+                .toList();
+    }
+
+    public void addMigrants(List<List<Integer>> migrants) {
+        for (List<Integer> migrant : migrants) {
+            int index = random.nextInt(population.size());
+            population.set(index, migrant);
+        }
     }
 }

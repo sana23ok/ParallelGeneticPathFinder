@@ -7,5 +7,8 @@ public class Constants {
     public static int GENERATIONS = 100;
     public static double MUTATION_RATE = 0.05;
     public static int TOURNAMENT_SIZE = 5;
+    public static int NUM_ISLANDS = 5;
+    public static int MIGRATION_INTERVAL = 20;
+    public static int MIGRATION_COUNT = 3;
 }
 

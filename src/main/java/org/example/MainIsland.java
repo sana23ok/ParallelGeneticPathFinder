@@ -20,7 +20,7 @@ public class MainIsland {
             // Load graph into memory
             int[][] graph = new int[NUM_NODES][NUM_NODES];
             loadGraph(filename, graph);
-            //for (int i = 0; i < 4; i++) {
+            for (int i = 0; i < 4; i++) {
 
                 // Measure execution time for ShortestPathGAParallel (parallel)
                 long startSeqIsland = System.nanoTime();
@@ -51,7 +51,7 @@ public class MainIsland {
                 }
 
                 System.out.println("- - - - - - - - - - - - - - - - - - - - ");
-            //}
+            }
 
         } catch (IOException e) {
             System.err.println("Error occurred while handling the graph file: " + e.getMessage());

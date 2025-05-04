@@ -9,26 +9,22 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static org.example.Constants.GENERATIONS;
-import static org.example.Constants.NUM_NODES;
+import static org.example.Constants.*;
 
 public class ShortestPathGAIslandParallel {
 
     private final int[][] graph;
-    private final int numIslands = Runtime.getRuntime().availableProcessors();
-    private final int migrationInterval = 20;
-    private final int migrantsCount = 3;
 
     public ShortestPathGAIslandParallel(int[][] graph) {
         this.graph = graph;
     }
 
     public List<Integer> findShortestPath() {
-        ExecutorService executor = Executors.newFixedThreadPool(numIslands);
+        ExecutorService executor = Executors.newFixedThreadPool(NUM_ISLANDS);
         List<IslandParallel> islands = new ArrayList<>();
         //System.out.println("Num of islands: " + numIslands);
 
-        for (int i = 0; i < numIslands; i++) {
+        for (int i = 0; i < NUM_ISLANDS; i++) {
             islands.add(new IslandParallel(graph));
         }
 
@@ -46,7 +42,7 @@ public class ShortestPathGAIslandParallel {
                 e.printStackTrace();
             }
 
-            if (gen > 0 && gen % migrationInterval == 0) {
+            if (gen > 0 && gen % MIGRATION_INTERVAL == 0) {
                 migrate(islands);
             }
         }
@@ -65,10 +61,20 @@ public class ShortestPathGAIslandParallel {
             IslandParallel source = islands.get(i);
             IslandParallel target = islands.get((i + 1) % islands.size());
 
-            List<List<Integer>> migrants = source.getBestIndividuals(migrantsCount);
+            List<List<Integer>> migrants = source.getBestIndividuals(MIGRATION_COUNT);
             target.addMigrants(migrants);
         }
     }
+
+
+//    private void migrate(List<IslandParallel> islands) {
+//        islands.parallelStream().forEach(source -> {
+//            IslandParallel target = islands.get((islands.indexOf(source) + 1) % islands.size());
+//            List<List<Integer>> migrants = source.getBestIndividuals(migrantsCount);
+//            target.addMigrants(migrants);
+//        });
+//    }
+
 
     public static List<Integer> run(int[][] graph) {
         ShortestPathGAIslandParallel ga = new ShortestPathGAIslandParallel(graph);
