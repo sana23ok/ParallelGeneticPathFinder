@@ -30,16 +30,16 @@ public class ShortestPathGAIslandParallel {
 
     public List<Integer> findShortestPath() {
         ExecutorService executor = Executors.newFixedThreadPool(numIslands);
-        List<Island> islands = new ArrayList<>();
+        List<IslandParallel> islands = new ArrayList<>();
         //System.out.println("Num of islands: " + numIslands);
 
         for (int i = 0; i < numIslands; i++) {
-            islands.add(new Island(graph));
+            islands.add(new IslandParallel(graph));
         }
 
         for (int gen = 0; gen < GENERATIONS; gen++) {
             List<Callable<Void>> tasks = new ArrayList<>();
-            for (Island island : islands) {
+            for (IslandParallel island : islands) {
                 tasks.add(() -> {
                     island.evolve();
                     return null;
@@ -60,15 +60,15 @@ public class ShortestPathGAIslandParallel {
 
         // Знаходимо найкращий шлях серед усіх островів
         return islands.stream()
-                .map(Island::getBestPath)
+                .map(IslandParallel::getBestPath)
                 .min(Comparator.comparingInt(p -> calculateFitness(p, graph)))
                 .orElse(null);
     }
 
-    private void migrate(List<Island> islands) {
+    private void migrate(List<IslandParallel> islands) {
         for (int i = 0; i < islands.size(); i++) {
-            Island source = islands.get(i);
-            Island target = islands.get((i + 1) % islands.size());
+            IslandParallel source = islands.get(i);
+            IslandParallel target = islands.get((i + 1) % islands.size());
 
             List<List<Integer>> migrants = source.getBestIndividuals(migrantsCount);
             target.addMigrants(migrants);

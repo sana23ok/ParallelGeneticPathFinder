@@ -18,7 +18,7 @@ public class ShortestPathGAIslandSequential {
     }
 
     public List<Integer> findShortestPath() {
-        SeqIsland island = new SeqIsland(graph);
+        IslandSequential island = new IslandSequential(graph);
 
         for (int gen = 0; gen < GENERATIONS; gen++) {
             island.evolve();
