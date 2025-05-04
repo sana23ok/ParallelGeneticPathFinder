@@ -1,0 +1,196 @@
+package org.example.parallel;
+
+import org.example.Island;
+
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+import static org.example.Constants.POPULATION_SIZE;
+import static org.example.Constants.TOURNAMENT_SIZE;
+
+public class IslandParallel extends Island {
+
+    public IslandParallel(int[][] graph) {
+        super(graph);
+    }
+
+    @Override
+    protected List<List<Integer>> createPopulationList() {
+        return new CopyOnWriteArrayList<>();
+    }
+
+    @Override
+    protected Map<List<Integer>, Integer> createFitnessCacheMap() {
+        return new ConcurrentHashMap<>();
+    }
+
+    @Override
+    protected void initializePopulation() {
+        int targetSize = POPULATION_SIZE / Runtime.getRuntime().availableProcessors();
+
+        IntStream.range(0, targetSize).forEach(i -> {
+            while (true) {
+                List<Integer> path = generateRandomPath();
+                if (isValidPath(path)) {
+                    population.add(path);
+                    break;
+                }
+            }
+        });
+    }
+
+    @Override
+    public void evolve() {
+        List<List<Integer>> nextGeneration = Collections.synchronizedList(new ArrayList<>());
+        evaluatePopulation(); // послідовно
+
+        // Еволюція також без паралельності
+        IntStream.range(0, population.size()).forEach(i -> {
+            List<Integer> parent1 = tournamentSelection();
+            List<Integer> parent2 = tournamentSelection();
+            List<Integer> child = crossover(parent1, parent2);
+            mutate(child);
+            if (isValidPath(child)) {
+                nextGeneration.add(child);
+            } else {
+                nextGeneration.add(parent1); // fallback
+            }
+        });
+
+        population.clear();
+        population.addAll(nextGeneration);
+    }
+
+    public List<List<Integer>> getBestIndividuals(int count) {
+        return population.stream()
+                .sorted(Comparator.comparingInt(this::calculateFitness))
+                .limit(count)
+                .collect(Collectors.toList());
+    }
+
+    public void addMigrants(List<List<Integer>> migrants) {
+        for (List<Integer> migrant : migrants) {
+            int index = random.nextInt(population.size());
+            population.set(index, migrant);
+        }
+    }
+
+    @Override
+    protected void evaluatePopulation() {
+        // Виконання оцінки без паралелізації
+        population.forEach(this::calculateFitness);
+    }
+
+    @Override
+    protected List<Integer> tournamentSelection() {
+        return IntStream.range(0, TOURNAMENT_SIZE)
+                .mapToObj(i -> population.get(random.nextInt(population.size())))
+                .min(Comparator.comparingInt(this::calculateFitness))
+                .orElse(population.get(0)); // fallback
+    }
+}
+
+
+package org.example.parallel;
+
+import org.example.graph.GraphVisualizer;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import static org.example.Constants.*;
+
+public class ShortestPathGAIslandParallel {
+
+    private final int[][] graph;
+
+    public ShortestPathGAIslandParallel(int[][] graph) {
+        this.graph = graph;
+    }
+
+    public List<Integer> findShortestPath() {
+        ExecutorService executor = Executors.newFixedThreadPool(NUM_ISLANDS);
+        List<IslandParallel> islands = new ArrayList<>();
+        //System.out.println("Num of islands: " + numIslands);
+
+        for (int i = 0; i < NUM_ISLANDS; i++) {
+            islands.add(new IslandParallel(graph));
+        }
+
+        for (int gen = 0; gen < GENERATIONS; gen++) {
+            List<Callable<Void>> tasks = new ArrayList<>();
+            for (IslandParallel island : islands) {
+                tasks.add(() -> {
+                    island.evolve();
+                    return null;
+                });
+            }
+            try {
+                executor.invokeAll(tasks);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            if (gen > 0 && gen % MIGRATION_INTERVAL == 0) {
+                migrate(islands);
+            }
+        }
+
+        executor.shutdown();
+
+        // Знаходимо найкращий шлях серед усіх островів
+        return islands.stream()
+                .map(IslandParallel::getBestPath)
+                .min(Comparator.comparingInt(p -> calculateFitness(p, graph)))
+                .orElse(null);
+    }
+
+    private void migrate(List<IslandParallel> islands) {
+        for (int i = 0; i < islands.size(); i++) {
+            IslandParallel source = islands.get(i);
+            IslandParallel target = islands.get((i + 1) % islands.size());
+
+            List<List<Integer>> migrants = source.getBestIndividuals(MIGRATION_COUNT);
+            target.addMigrants(migrants);
+        }
+    }
+
+
+//    private void migrate(List<IslandParallel> islands) {
+//        islands.parallelStream().forEach(source -> {
+//            IslandParallel target = islands.get((islands.indexOf(source) + 1) % islands.size());
+//            List<List<Integer>> migrants = source.getBestIndividuals(migrantsCount);
+//            target.addMigrants(migrants);
+//        });
+//    }
+
+
+    public static List<Integer> run(int[][] graph) {
+        ShortestPathGAIslandParallel ga = new ShortestPathGAIslandParallel(graph);
+        List<Integer> shortestPath = ga.findShortestPath();
+
+        System.out.println("Fitness: " + ga.calculateFitness(shortestPath, graph));
+        //System.out.println("Shortest path: " + shortestPath);
+
+        if (NUM_NODES <= 20) {
+            GraphVisualizer visualizer = new GraphVisualizer(graph);
+            visualizer.showGraph(shortestPath);
+        }
+        return shortestPath;
+    }
+
+    private int calculateFitness(List<Integer> path, int[][] graph) {
+        int fitness = 0;
+        for (int i = 0; i < path.size() - 1; i++) {
+            fitness += graph[path.get(i)][path.get(i + 1)];
+        }
+        return fitness;
+    }
+}

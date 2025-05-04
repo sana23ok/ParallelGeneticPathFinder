@@ -22,7 +22,7 @@ public class MainIsland {
             loadGraph(filename, graph);
             for (int i = 0; i < 4; i++) {
 
-                // Measure execution time for ShortestPathGAParallel (parallel)
+                // Measure execution time for ShortestPathGAIslandSequential
                 long startSeqIsland = System.nanoTime();
                 List<Integer> seqPath = ShortestPathGAIslandSequential.run(graph);
                 long endSeqIsland = System.nanoTime();
@@ -31,25 +31,25 @@ public class MainIsland {
                 GraphPathChecker checkerSeq = new GraphPathChecker();
                 checkerSeq.check(filename, seqPath);
 
-                System.out.println("Time for Sequential: " + durationSeqIsland + " ns");
+                System.out.printf("Time for Sequential: %.3f s%n", durationSeqIsland / 1_000_000_000.0);
 
-                // Measure execution time for ShortestPathGAParallel (parallel)
+                // Measure execution time for ShortestPathGAIslandParallel
                 long startIsland = System.nanoTime();
-                List<Integer> paralelPath =  ShortestPathGAIslandParallel.run(graph);
+                List<Integer> paralelPath = ShortestPathGAIslandParallel.run(graph);
                 long endIsland = System.nanoTime();
                 long durationIsland = endIsland - startIsland;
 
                 GraphPathChecker checkerPar = new GraphPathChecker();
                 checkerPar.check(filename, paralelPath);
 
-                System.out.println("Time for Sequential: " + durationIsland + " ns");
+                System.out.printf("Time for Parallel: %.3f s%n", durationIsland / 1_000_000_000.0);
 
                 // Calculate speedup
-                if (durationSeqIsland != 0) {
+                if (durationIsland != 0) {
                     double speedup = (double) durationSeqIsland / durationIsland;
-                    System.out.println("Speedup: " + speedup);
+                    System.out.printf("Speedup: %.2f%n", speedup);
                 } else {
-                    System.out.println("Time for Sequential is too small to calculate speedup.");
+                    System.out.println("Time for Parallel is too small to calculate speedup.");
                 }
 
                 System.out.println("- - - - - - - - - - - - - - - - - - - - ");
@@ -62,4 +62,3 @@ public class MainIsland {
         }
     }
 }
-
