@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.List;
 import static org.example.graph.GraphUtils.*;
 import org.example.graph.GraphPathChecker;
-import org.example.islandSequential.ShortestPathGAIslandSequential;
+import org.example.old_versions.ShortestPathGAIslandSequential;
 
 
 public class MainTest {

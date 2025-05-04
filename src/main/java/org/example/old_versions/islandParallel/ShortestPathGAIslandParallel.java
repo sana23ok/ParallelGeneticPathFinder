@@ -1,4 +1,4 @@
-package org.example.islandParallel;
+package org.example.old_versions.islandParallel;
 
 import org.example.graph.GraphVisualizer;
 

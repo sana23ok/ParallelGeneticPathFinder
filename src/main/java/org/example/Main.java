@@ -1,6 +1,8 @@
 package org.example;
 
-import org.example.islandParallel.ShortestPathGAIslandParallel;
+import org.example.old_versions.ShortestPathGA;
+import org.example.old_versions.ShortestPathGAParallel1;
+import org.example.old_versions.islandParallel.ShortestPathGAIslandParallel;
 
 import java.io.IOException;
 import static org.example.Constants.NUM_NODES;

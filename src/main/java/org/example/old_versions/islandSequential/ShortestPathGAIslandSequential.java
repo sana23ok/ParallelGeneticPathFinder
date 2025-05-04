@@ -1,4 +1,4 @@
-package org.example.islandSequential;
+package org.example.old_versions.islandSequential;
 
 import org.example.graph.GraphVisualizer;
 
