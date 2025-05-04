@@ -3,11 +3,8 @@ package org.example.parallel;
 import org.example.Island;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
 import static org.example.Constants.POPULATION_SIZE;
 import static org.example.Constants.TOURNAMENT_SIZE;
 
@@ -17,59 +14,79 @@ public class IslandParallel extends Island {
         super(graph);
     }
 
+
     @Override
     protected List<List<Integer>> createPopulationList() {
-        return new CopyOnWriteArrayList<>();
+        return new ArrayList<>();
     }
+
 
     @Override
     protected Map<List<Integer>, Integer> createFitnessCacheMap() {
-        return new ConcurrentHashMap<>();
+        return new HashMap<>();
     }
+
 
     @Override
     protected void initializePopulation() {
-        int targetSize = POPULATION_SIZE / Runtime.getRuntime().availableProcessors();
+        // Ініціалізація популяції з використанням паралельного потоку:
+        // для кожного створюється валідний маршрут у паралельному режимі
+        List<List<Integer>> parallelPopulation = Collections.synchronizedList(new ArrayList<>());
 
-        IntStream.range(0, targetSize).forEach(i -> {
+        IntStream.range(0, POPULATION_SIZE).parallel().forEach(i -> {
             while (true) {
                 List<Integer> path = generateRandomPath();
                 if (isValidPath(path)) {
-                    population.add(path);
+                    parallelPopulation.add(path);
                     break;
                 }
             }
         });
+
+        population.addAll(parallelPopulation);
     }
+
 
     @Override
     public void evolve() {
+        // Основна еволюційна фаза: кожен індивідуум створюється паралельно
+        // за рахунок вибору батьків, кросоверу, мутації та перевірки валідності.
         List<List<Integer>> nextGeneration = Collections.synchronizedList(new ArrayList<>());
-        evaluatePopulation(); // послідовно
+        evaluatePopulation(); // Оцінка популяції без паралельності (як раніше)
 
-        // Еволюція також без паралельності
-        IntStream.range(0, population.size()).forEach(i -> {
+        // Паралельне виконання еволюційного процесу
+        IntStream.range(0, population.size()).parallel().forEach(i -> {
+            // Вибір батьків
             List<Integer> parent1 = tournamentSelection();
             List<Integer> parent2 = tournamentSelection();
+
+            // Кросовер між батьками
             List<Integer> child = crossover(parent1, parent2);
+
+            // Мутація
             mutate(child);
+
+            // Перевірка валідності і додавання до наступного покоління
             if (isValidPath(child)) {
                 nextGeneration.add(child);
             } else {
-                nextGeneration.add(parent1); // fallback
+                nextGeneration.add(parent1); // fallback, якщо шлях не валідний
             }
         });
 
+        // Оновлення популяції
         population.clear();
         population.addAll(nextGeneration);
     }
 
+
     public List<List<Integer>> getBestIndividuals(int count) {
-        return population.stream()
+        return population.parallelStream()
                 .sorted(Comparator.comparingInt(this::calculateFitness))
                 .limit(count)
                 .collect(Collectors.toList());
     }
+
 
     public void addMigrants(List<List<Integer>> migrants) {
         for (List<Integer> migrant : migrants) {
@@ -78,11 +95,13 @@ public class IslandParallel extends Island {
         }
     }
 
+
     @Override
     protected void evaluatePopulation() {
-        // Виконання оцінки без паралелізації
-        population.forEach(this::calculateFitness);
+        // Паралельна оцінка фітнесу кожного індивідуума в популяції
+        population.parallelStream().forEach(this::calculateFitness);
     }
+
 
     @Override
     protected List<Integer> tournamentSelection() {

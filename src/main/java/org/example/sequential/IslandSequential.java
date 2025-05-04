@@ -22,6 +22,7 @@ public class IslandSequential extends Island {
 
     @Override
     protected void initializePopulation() {
+        //System.out.println("Target Size: " + POPULATION_SIZE);
         while (population.size() < POPULATION_SIZE) {
             List<Integer> path = generateRandomPath();
             if (isValidPath(path)) {
