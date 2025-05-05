@@ -21,6 +21,7 @@ public class MainIsland {
             int[][] graph = new int[NUM_NODES][NUM_NODES];
             loadGraph(filename, graph);
             for (int i = 0; i < 4; i++) {
+                System.out.println("Nodes: "+NUM_NODES);
 
                 // Measure execution time for ShortestPathGAIslandSequential
                 long startSeqIsland = System.nanoTime();

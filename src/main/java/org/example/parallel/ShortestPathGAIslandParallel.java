@@ -1,100 +1,82 @@
 package org.example.parallel;
 
 import org.example.graph.GraphVisualizer;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+
+import java.util.*;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.RecursiveAction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
 import static org.example.Constants.*;
 
-public class ShortestPathGAIslandParallel {
+class IslandEvolutionTask extends RecursiveAction {
+    private final IslandParallel island;
 
-    private final int[][] graph;
-
-
-    public ShortestPathGAIslandParallel(int[][] graph) {
-        this.graph = graph;
+    public IslandEvolutionTask(IslandParallel island) {
+        this.island = island;
     }
 
+    @Override
+    protected void compute() {
+        island.evolve();
+    }
+}
 
-    public List<Integer> findShortestPath() {
-        ExecutorService executor = Executors.newFixedThreadPool(NUM_ISLANDS);// Пул потоків для островів
-        List<IslandParallel> islands = new ArrayList<>();
-        //System.out.println("Num of islands: " + numIslands);
+class MigrationTask extends RecursiveAction {
+    private final List<IslandParallel> islands;
 
-        for (int i = 0; i < NUM_ISLANDS; i++) {
-            islands.add(new IslandParallel(graph));
-        }
-
-        for (int gen = 0; gen < GENERATIONS; gen++) {
-            List<Callable<Void>> tasks = new ArrayList<>();
-            for (IslandParallel island : islands) {
-                // Кожен острів виконує еволюцію в окремому потоці
-                tasks.add(() -> {
-                    island.evolve();
-                    return null;
-                });
-            }
-            try {
-                executor.invokeAll(tasks); // Запускає всі задачі паралельно
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-            if (gen > 0 && gen % MIGRATION_INTERVAL == 0) {
-                migrate(islands);  // Міграція після кожного N-го покоління
-            }
-        }
-
-        executor.shutdown();
-
-        // Паралельний пошук найкращого шляху серед усіх островів:
-        // кожен острів повертає свій найкращий шлях у паралельному потоці,
-        // після чого обирається глобально найкращий шлях за мінімальним фітнесом.
-
-        // Знаходимо найкращий шлях серед усіх островів
-        return islands.parallelStream()
-                .map(IslandParallel::getBestPath)
-                .min(Comparator.comparingInt(p -> calculateFitness(p, graph)))
-                .orElse(null);
-
+    public MigrationTask(List<IslandParallel> islands) {
+        this.islands = islands;
     }
 
-
-    private void migrate(List<IslandParallel> islands) {
-        //підготувати список пар source -> migrants паралельно, а внесення змін — серіалізувати:
+    @Override
+    protected void compute() {
         List<List<List<Integer>>> migrantsList = IntStream.range(0, islands.size())
-                .parallel()
                 .mapToObj(i -> islands.get(i).getBestIndividuals(MIGRATION_COUNT))
                 .collect(Collectors.toList());
 
-        // Потім послідовне оновлення (зміна стану!)
         for (int i = 0; i < islands.size(); i++) {
             IslandParallel target = islands.get((i + 1) % islands.size());
             target.addMigrants(migrantsList.get(i));
         }
+    }
+}
 
+public class ShortestPathGAIslandParallel {
+
+    private final int[][] graph;
+    private final ForkJoinPool forkJoinPool;
+    private final List<IslandParallel> islands;
+
+    public ShortestPathGAIslandParallel(int[][] graph) {
+        this.graph = graph;
+        this.forkJoinPool = new ForkJoinPool(NUM_ISLANDS);
+        this.islands = IntStream.range(0, NUM_ISLANDS)
+                .mapToObj(i -> new IslandParallel(graph))
+                .collect(Collectors.toList());
     }
 
+    public List<Integer> findShortestPath() {
+        for (int gen = 0; gen < GENERATIONS; gen++) {
+            List<IslandEvolutionTask> evolutionTasks = islands.stream()
+                    .map(IslandEvolutionTask::new)
+                    .collect(Collectors.toList());
 
-    public static List<Integer> run(int[][] graph) {
-        ShortestPathGAIslandParallel ga = new ShortestPathGAIslandParallel(graph);
-        List<Integer> shortestPath = ga.findShortestPath();
+            evolutionTasks.forEach(forkJoinPool::invoke);
 
-        System.out.println("Fitness: " + ga.calculateFitness(shortestPath, graph));
-        //System.out.println("Shortest path: " + shortestPath);
-
-        if (NUM_NODES <= 20) {
-            GraphVisualizer visualizer = new GraphVisualizer(graph);
-            visualizer.showGraph(shortestPath);
+            if (gen > 0 && gen % MIGRATION_INTERVAL == 0) {
+                forkJoinPool.invoke(new MigrationTask(islands));
+            }
         }
-        return shortestPath;
-    }
 
+        forkJoinPool.shutdown();
+
+        return islands.stream()
+                .map(IslandParallel::getBestPath)
+                .min(Comparator.comparingInt(p -> calculateFitness(p, graph)))
+                .orElse(null);
+    }
 
     private int calculateFitness(List<Integer> path, int[][] graph) {
         int fitness = 0;
@@ -102,5 +84,19 @@ public class ShortestPathGAIslandParallel {
             fitness += graph[path.get(i)][path.get(i + 1)];
         }
         return fitness;
+    }
+
+    public static List<Integer> run(int[][] graph) {
+        ShortestPathGAIslandParallel ga = new ShortestPathGAIslandParallel(graph);
+        List<Integer> shortestPath = ga.findShortestPath();
+
+        System.out.println("Fitness: " + ga.calculateFitness(shortestPath, graph));
+        System.out.println("Shortest path: " + shortestPath);
+
+        if (NUM_NODES <= 20) {
+            GraphVisualizer visualizer = new GraphVisualizer(graph);
+            visualizer.showGraph(shortestPath);
+        }
+        return shortestPath;
     }
 }

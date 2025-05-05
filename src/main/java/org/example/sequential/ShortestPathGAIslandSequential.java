@@ -56,10 +56,11 @@ public class ShortestPathGAIslandSequential {
         List<Integer> shortestPath = ga.findShortestPath();
 
         System.out.println("Fitness: " + ga.calculateFitness(shortestPath, graph));
-        if (NUM_NODES <= 20) {
-            GraphVisualizer visualizer = new GraphVisualizer(graph);
-            visualizer.showGraph(shortestPath);
-        }
+        System.out.println("Shortest path: " + shortestPath);
+//        if (NUM_NODES <= 20) {
+//            GraphVisualizer visualizer = new GraphVisualizer(graph);
+//            visualizer.showGraph(shortestPath);
+//        }
         return shortestPath;
     }
 
