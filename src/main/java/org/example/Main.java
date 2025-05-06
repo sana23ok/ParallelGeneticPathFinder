@@ -1,6 +1,7 @@
 package org.example;
 
 import org.example.old_versions.ShortestPathGA;
+import org.example.old_versions.ShortestPathGAParallelForkJoin;
 import org.example.old_versions.ShortestPathGAParallel1;
 import org.example.old_versions.islandParallel.ShortestPathGAIslandParallel;
 

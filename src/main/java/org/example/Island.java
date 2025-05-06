@@ -1,6 +1,7 @@
 package org.example;
 
 import java.util.*;
+import java.util.concurrent.ForkJoinPool;
 
 public abstract class Island {
 
@@ -10,6 +11,7 @@ public abstract class Island {
     protected final Random random = new Random();
     protected List<List<Integer>> population;
     protected Map<List<Integer>, Integer> fitnessCache;
+    protected ForkJoinPool pool;
 
 
     public Island(int[][] graph) {

@@ -53,7 +53,7 @@ public class ShortestPathGAIslandParallel {
         this.graph = graph;
         this.forkJoinPool = new ForkJoinPool(NUM_ISLANDS);
         this.islands = IntStream.range(0, NUM_ISLANDS)
-                .mapToObj(i -> new IslandParallel(graph))
+                .mapToObj(i -> new IslandParallel(graph, forkJoinPool))
                 .collect(Collectors.toList());
     }
 
