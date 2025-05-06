@@ -26,7 +26,7 @@ public class ShortestPathGAIslandParallel {
 
     private final int[][] graph;
     private final ForkJoinPool forkJoinPool;
-    private final List<IslandParallel> islands;
+    private List<IslandParallel> islands;
 
     // Конструктор, який приймає існуючий ForkJoinPool
     public ShortestPathGAIslandParallel(int[][] graph, ForkJoinPool forkJoinPool) {
@@ -35,6 +35,11 @@ public class ShortestPathGAIslandParallel {
         this.islands = IntStream.range(0, Constants.NUM_ISLANDS)
                 .mapToObj(i -> new IslandParallel(graph))
                 .collect(java.util.stream.Collectors.toList());
+
+        // Ініціалізація популяції одразу після створення островів
+        ParallelExecutor.runInCustomPool(forkJoinPool, () ->
+                islands.parallelStream().forEach(IslandParallel::initializePopulation)
+        );
     }
 
     // Конструктор за замовчуванням (використовує NUM_ISLANDS потоків)

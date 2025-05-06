@@ -18,7 +18,7 @@ public abstract class Island {
         this.graph = graph;
         this.population = createPopulationList();
         this.fitnessCache = createFitnessCacheMap();
-        initializePopulation();
+        //initializePopulation();
     }
 
 

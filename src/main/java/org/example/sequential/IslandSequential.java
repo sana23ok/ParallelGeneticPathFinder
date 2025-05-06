@@ -8,6 +8,7 @@ public class IslandSequential extends Island {
 
     public IslandSequential(int[][] graph) {
         super(graph);
+        initializePopulation();
     }
 
     @Override
