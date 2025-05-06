@@ -20,7 +20,6 @@ public class Main {
             // Load graph into memory
             int[][] graph = new int[NUM_NODES][NUM_NODES];
             loadGraph(filename, graph);
-            for (int i = 0; i < 4; i++) {
                 System.out.println("Nodes: "+NUM_NODES);
 
                 // Measure execution time for ShortestPathGAIslandSequential
@@ -31,6 +30,8 @@ public class Main {
 
                 GraphPathChecker checkerSeq = new GraphPathChecker();
                 checkerSeq.check(filename, seqPath);
+
+            for (int i = 0; i < 4; i++) {
 
                 System.out.printf("Time for Sequential: %.3f s%n", durationSeqIsland / 1_000_000_000.0);
 
