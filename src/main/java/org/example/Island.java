@@ -135,4 +135,6 @@ public abstract class Island {
             return fitness;
         });
     }
+
+    public abstract void addMigrants(List<List<Integer>> lists);
 }

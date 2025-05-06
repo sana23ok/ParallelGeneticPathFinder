@@ -4,8 +4,6 @@ import org.example.graph.GraphVisualizer;
 
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.*;
 
 import static org.example.Constants.*;
 
@@ -21,25 +19,104 @@ public class ShortestPathGAParallelForkJoin {
     }
 
     public List<Integer> findShortestPath() {
-        List<List<Integer>> population = initializePopulation();
+        List<List<Integer>> population = forkJoinPool.invoke(new InitializePopulationTask());
 
         for (int i = 0; i < GENERATIONS; i++) {
-            population = createNextGeneration(population);
+            population = forkJoinPool.invoke(new CreateNextGenerationTask(population));
         }
 
         return getBestPath(population);
     }
 
-    private List<List<Integer>> initializePopulation() {
-        return IntStream.range(0, POPULATION_SIZE).parallel()
-                .mapToObj(i -> {
-                    List<Integer> path;
-                    do {
-                        path = generateRandomPath();
-                    } while (!isValidPath(path));
-                    return path;
-                })
-                .collect(Collectors.toList());
+    private class InitializePopulationTask extends RecursiveTask<List<List<Integer>>> {
+        @Override
+        protected List<List<Integer>> compute() {
+            List<GeneratePathTask> tasks = new ArrayList<>();
+            for (int i = 0; i < POPULATION_SIZE; i++) {
+                tasks.add(new GeneratePathTask());
+            }
+            invokeAll(tasks);
+            List<List<Integer>> result = new ArrayList<>();
+            for (GeneratePathTask task : tasks) {
+                result.add(task.join());
+            }
+            return result;
+        }
+    }
+
+    private class GeneratePathTask extends RecursiveTask<List<Integer>> {
+        @Override
+        protected List<Integer> compute() {
+            List<Integer> path;
+            do {
+                path = generateRandomPath();
+            } while (!isValidPath(path));
+            return path;
+        }
+    }
+
+    private class CreateNextGenerationTask extends RecursiveTask<List<List<Integer>>> {
+        private final List<List<Integer>> population;
+
+        public CreateNextGenerationTask(List<List<Integer>> population) {
+            this.population = population;
+        }
+
+        @Override
+        protected List<List<Integer>> compute() {
+            List<ReproduceTask> tasks = new ArrayList<>();
+            for (int i = 0; i < POPULATION_SIZE; i++) {
+                tasks.add(new ReproduceTask(population));
+            }
+            invokeAll(tasks);
+            List<List<Integer>> nextGen = new ArrayList<>();
+            for (ReproduceTask task : tasks) {
+                nextGen.add(task.join());
+            }
+            return nextGen;
+        }
+    }
+
+    private class ReproduceTask extends RecursiveTask<List<Integer>> {
+        private final List<List<Integer>> population;
+
+        public ReproduceTask(List<List<Integer>> population) {
+            this.population = population;
+        }
+
+        @Override
+        protected List<Integer> compute() {
+            List<Integer> parent1 = forkJoinPool.invoke(new TournamentSelectionTask(population));
+            List<Integer> parent2 = forkJoinPool.invoke(new TournamentSelectionTask(population));
+            List<Integer> child = crossover(parent1, parent2);
+            mutate(child);
+            return isValidPath(child) ? child : population.get(random.nextInt(POPULATION_SIZE));
+        }
+    }
+
+    private class TournamentSelectionTask extends RecursiveTask<List<Integer>> {
+        private final List<List<Integer>> population;
+
+        public TournamentSelectionTask(List<List<Integer>> population) {
+            this.population = population;
+        }
+
+        @Override
+        protected List<Integer> compute() {
+            List<List<Integer>> candidates = new ArrayList<>();
+            for (int i = 0; i < TOURNAMENT_SIZE; i++) {
+                candidates.add(population.get(random.nextInt(POPULATION_SIZE)));
+            }
+            return candidates.stream()
+                    .min(Comparator.comparingInt(ShortestPathGAParallelForkJoin.this::calculateFitness))
+                    .orElse(population.get(0));
+        }
+    }
+
+    private List<Integer> getBestPath(List<List<Integer>> population) {
+        return population.stream()
+                .min(Comparator.comparingInt(this::calculateFitness))
+                .orElse(null);
     }
 
     private List<Integer> generateRandomPath() {
@@ -75,32 +152,6 @@ public class ShortestPathGAParallelForkJoin {
         return true;
     }
 
-    private List<List<Integer>> createNextGeneration(List<List<Integer>> population) {
-        try {
-            return forkJoinPool.submit(() ->
-                    IntStream.range(0, POPULATION_SIZE).parallel()
-                            .mapToObj(i -> {
-                                List<Integer> parent1 = tournamentSelection(population);
-                                List<Integer> parent2 = tournamentSelection(population);
-                                List<Integer> child = crossover(parent1, parent2);
-                                mutate(child);
-                                return isValidPath(child) ? child : population.get(random.nextInt(POPULATION_SIZE));
-                            })
-                            .collect(Collectors.toList())
-            ).get();
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-            return population;
-        }
-    }
-
-    private List<Integer> tournamentSelection(List<List<Integer>> population) {
-        return IntStream.range(0, TOURNAMENT_SIZE).parallel()
-                .mapToObj(i -> population.get(random.nextInt(POPULATION_SIZE)))
-                .min(Comparator.comparingInt(this::calculateFitness))
-                .orElse(population.get(0));
-    }
-
     private List<Integer> crossover(List<Integer> parent1, List<Integer> parent2) {
         List<Integer> child = new ArrayList<>();
         int crossoverPoint = random.nextInt(Math.min(parent1.size(), parent2.size()));
@@ -129,12 +180,6 @@ public class ShortestPathGAParallelForkJoin {
             fitness += graph[path.get(i)][path.get(i + 1)];
         }
         return fitness;
-    }
-
-    private List<Integer> getBestPath(List<List<Integer>> population) {
-        return population.parallelStream()
-                .min(Comparator.comparingInt(this::calculateFitness))
-                .orElse(null);
     }
 
     public static void run(int[][] graph) {
