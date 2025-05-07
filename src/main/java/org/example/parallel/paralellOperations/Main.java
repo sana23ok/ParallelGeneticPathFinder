@@ -21,40 +21,40 @@ public class Main {
             int[][] graph = new int[NUM_NODES][NUM_NODES];
             loadGraph(filename, graph);
             for (int i = 0; i < 4; i++) {
-                System.out.println("Nodes: "+NUM_NODES);
+                System.out.println("Nodes: " + NUM_NODES);
 
-                // Measure execution time for ShortestPathGAIslandSequential
+                // Sequential
                 long startSeqIsland = System.nanoTime();
                 List<Integer> seqPath = ShortestPathGAIslandSequential.run(graph);
                 long endSeqIsland = System.nanoTime();
                 long durationSeqIsland = endSeqIsland - startSeqIsland;
 
-                GraphPathChecker checkerSeq = new GraphPathChecker();
-                checkerSeq.check(filename, seqPath);
+                new GraphPathChecker().check(filename, seqPath);
+                System.out.printf("Time for Sequential: %.3f ms%n", durationSeqIsland / 1_000_000.0);
 
-                System.out.printf("Time for Sequential: %.3f s%n", durationSeqIsland / 1_000_000_000.0);
+                // Parallel run1
+                long start1 = System.nanoTime();
+                List<Integer> path1 = ShortestPathGAIslandParallel.run1(graph);
+                long end1 = System.nanoTime();
+                long duration1 = end1 - start1;
 
-                // Measure execution time for ShortestPathGAIslandParallel
-                long startIsland = System.nanoTime();
-                List<Integer> paralelPath = ShortestPathGAIslandParallel.run(graph);
-                long endIsland = System.nanoTime();
-                long durationIsland = endIsland - startIsland;
+                new GraphPathChecker().check(filename, path1);
+                System.out.printf("Time for run1: %.3f ms%n", duration1 / 1_000_000.0);
+                System.out.printf("Speedup run1: %.2f%n", (double) durationSeqIsland / duration1);
 
-                GraphPathChecker checkerPar = new GraphPathChecker();
-                checkerPar.check(filename, paralelPath);
+                // Parallel run2
+                long start2 = System.nanoTime();
+                List<Integer> path2 = ShortestPathGAIslandParallel.run2(graph);
+                long end2 = System.nanoTime();
+                long duration2 = end2 - start2;
 
-                System.out.printf("Time for Parallel: %.3f s%n", durationIsland / 1_000_000_000.0);
-
-                // Calculate speedup
-                if (durationIsland != 0) {
-                    double speedup = (double) durationSeqIsland / durationIsland;
-                    System.out.printf("Speedup: %.2f%n", speedup);
-                } else {
-                    System.out.println("Time for Parallel is too small to calculate speedup.");
-                }
+                new GraphPathChecker().check(filename, path2);
+                System.out.printf("Time for run2: %.3f ms%n", duration2 / 1_000_000.0);
+                System.out.printf("Speedup run2: %.2f%n", (double) durationSeqIsland / duration2);
 
                 System.out.println("- - - - - - - - - - - - - - - - - - - - ");
             }
+
 
         } catch (IOException e) {
             System.err.println("Error occurred while handling the graph file: " + e.getMessage());

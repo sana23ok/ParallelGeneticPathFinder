@@ -3,6 +3,9 @@ package org.example.parallel.paralellOperations;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.example.Constants.*;
 
@@ -13,7 +16,8 @@ public class ShortestPathGAIslandParallel {
         this.graph = graph;
     }
 
-    public List<Integer> findShortestPath() {
+    // послідовне виконання островів, але розпралелені операції
+    public List<Integer> findShortestPath1() {
         List<IslandParallel> islands = new ArrayList<>();
 
         // Ініціалізація островів
@@ -22,7 +26,6 @@ public class ShortestPathGAIslandParallel {
             island.initializePopulation(); // <-- Ініціалізує популяцію одразу після створення
             islands.add(island);
         }
-
 
         // Еволюція поколінь
         for (int gen = 0; gen < GENERATIONS; gen++) {
@@ -42,6 +45,45 @@ public class ShortestPathGAIslandParallel {
                 .orElse(null);
     }
 
+    // пралельне виконання островів і всі розпралелені операції, але в ForkJoinPool.commonPool()
+    public List<Integer> findShortestPath2() {
+        List<IslandParallel> islands = new ArrayList<>();
+
+        // Ініціалізація островів
+        for (int i = 0; i < NUM_ISLANDS; i++) {
+            IslandParallel island = new IslandParallel(graph);
+            island.initializePopulation(); // <-- Ініціалізує популяцію одразу після створення
+            islands.add(island);
+        }
+
+        ForkJoinPool forkJoinPool = ForkJoinPool.commonPool();
+
+        try {
+            for (int gen = 0; gen < GENERATIONS; gen++) {
+                forkJoinPool.submit(() ->
+                        islands.parallelStream().forEach(IslandParallel::evolve)
+                ).get(); // Очікуємо завершення всіх еволюцій
+
+                if (gen > 0 && gen % MIGRATION_INTERVAL == 0) {
+                    migrate(islands);
+                }
+            }
+
+            // Пошук найкращого шляху
+            return islands.stream()
+                    .map(IslandParallel::getBestPath)
+                    .min(Comparator.comparingInt(p -> calculateFitness(p, graph)))
+                    .orElse(null);
+
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            Thread.currentThread().interrupt();
+            return null;
+        } finally {
+            forkJoinPool.shutdown();
+        }
+    }
+
     private void migrate(List<IslandParallel> islands) {
         for (int i = 0; i < islands.size(); i++) {
             IslandParallel source = islands.get(i);
@@ -52,9 +94,18 @@ public class ShortestPathGAIslandParallel {
         }
     }
 
-    public static List<Integer> run(int[][] graph) {
+    public static List<Integer> run1(int[][] graph) {
         ShortestPathGAIslandParallel ga = new ShortestPathGAIslandParallel(graph);
-        List<Integer> shortestPath = ga.findShortestPath();
+        List<Integer> shortestPath = ga.findShortestPath1();
+
+        System.out.println("Fitness: " + ga.calculateFitness(shortestPath, graph));
+        System.out.println("Shortest path: " + shortestPath);
+        return shortestPath;
+    }
+
+    public static List<Integer> run2(int[][] graph) {
+        ShortestPathGAIslandParallel ga = new ShortestPathGAIslandParallel(graph);
+        List<Integer> shortestPath = ga.findShortestPath2();
 
         System.out.println("Fitness: " + ga.calculateFitness(shortestPath, graph));
         System.out.println("Shortest path: " + shortestPath);
