@@ -41,7 +41,7 @@ public class Main {
 
             // Measure execution time for ShortestPathGAParallel (parallel)
             long startTimeGAParallel2 = System.nanoTime();
-            ShortestPathGAParallelForkJoin.run(graph);
+            _ShortestPathGAParallel.run(graph);
             long endTimeGAParallel2 = System.nanoTime();
             long durationGAParallel2 = endTimeGAParallel2 - startTimeGAParallel2;
 

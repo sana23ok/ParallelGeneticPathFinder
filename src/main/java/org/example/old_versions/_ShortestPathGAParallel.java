@@ -1,42 +1,37 @@
 package org.example.old_versions;
-
 import org.example.graph.GraphVisualizer;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import static org.example.Constants.*;
 
 public class _ShortestPathGAParallel {
 
-    private final int[][] graph; // Матриця суміжності графа
-    private final int startNode = 0; // Початкова вершина
-    private final int endNode = NUM_NODES / 2 + 1; // Кінцева вершина
+    private final int[][] graph;
+    private final int startNode = 0;
+    private final int endNode = NUM_NODES / 2 + 1;
     private final Random random;
-    private final ExecutorService executor; // Пул потоків
+    private final ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()); // Пул потоків
 
     public _ShortestPathGAParallel(int[][] graph) {
         this.graph = graph;
         this.random = new Random();
-        this.executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
     }
 
     public List<Integer> findShortestPath() {
         List<List<Integer>> population = initializePopulation();
         for (int i = 0; i < GENERATIONS; i++) {
-            Map<List<Integer>, Integer> evaluated = evaluatePopulation(population);
             population = createNextGeneration(population);
-            List<Integer> best = evaluated.entrySet().stream()
-                    .min(Map.Entry.comparingByValue())
-                    .map(Map.Entry::getKey)
-                    .orElse(null);
-            int fitness = evaluated.get(best);
-            //System.out.println("Generation " + (i + 1) + ", Best Fitness: " + fitness);
+            // System.out.println("Generation " + (i + 1) + ", Best Fitness: " + calculateFitness(getBestPath(population)));
         }
-        executor.shutdown();
+        // Не завершуємо executor тут, оскільки getBestPath його використовує
         return getBestPath(population);
     }
 
@@ -92,43 +87,29 @@ public class _ShortestPathGAParallel {
         return true;
     }
 
-    private Map<List<Integer>, Integer> evaluatePopulation(List<List<Integer>> population) {
-        List<Callable<Map.Entry<List<Integer>, Integer>>> tasks = new ArrayList<>();
-        for (List<Integer> path : population) {
-            tasks.add(() -> Map.entry(path, calculateFitness(path)));
-        }
-        Map<List<Integer>, Integer> result = new ConcurrentHashMap<>();
-        try {
-            List<Future<Map.Entry<List<Integer>, Integer>>> futures = executor.invokeAll(tasks);
-            for (Future<Map.Entry<List<Integer>, Integer>> future : futures) {
-                Map.Entry<List<Integer>, Integer> entry = future.get();
-                result.put(entry.getKey(), entry.getValue());
-            }
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
-        return result;
-    }
-
     private List<List<Integer>> createNextGeneration(List<List<Integer>> population) {
-        List<CompletableFuture<List<Integer>>> futures = new ArrayList<>();
+        List<List<Integer>> newPopulation = new ArrayList<>(POPULATION_SIZE);
+        List<Future<List<Integer>>> futures = new ArrayList<>();
+
         for (int i = 0; i < POPULATION_SIZE; i++) {
-            futures.add(CompletableFuture.supplyAsync(() -> {
+            futures.add(executor.submit(() -> {
                 List<Integer> parent1 = tournamentSelection(population);
                 List<Integer> parent2 = tournamentSelection(population);
                 List<Integer> child = crossover(parent1, parent2);
                 mutate(child);
-                return child;
-            }, executor).thenApplyAsync(child -> {
-                if (isValidPath(child)) {
-                    return child;
-                } else {
-                    return population.get(random.nextInt(POPULATION_SIZE));
-                }
-            }, executor));
+                return isValidPath(child) ? child : population.get(random.nextInt(POPULATION_SIZE));
+            }));
         }
 
-        return futures.stream().map(CompletableFuture::join).toList();
+        for (Future<List<Integer>> future : futures) {
+            try {
+                newPopulation.add(future.get());
+            } catch (InterruptedException | ExecutionException e) {
+                Thread.currentThread().interrupt();
+                // Обробка помилок
+            }
+        }
+        return newPopulation;
     }
 
     private List<Integer> tournamentSelection(List<List<Integer>> population) {
@@ -169,7 +150,7 @@ public class _ShortestPathGAParallel {
         }
     }
 
-    private int calculateFitness(List<Integer> path) {
+    int calculateFitness(List<Integer> path) {
         int fitness = 0;
         for (int i = 0; i < path.size() - 1; i++) {
             fitness += graph[path.get(i)][path.get(i + 1)];
@@ -178,34 +159,49 @@ public class _ShortestPathGAParallel {
     }
 
     private List<Integer> getBestPath(List<List<Integer>> population) {
-        List<Integer> bestPath = null;
         int bestFitness = Integer.MAX_VALUE;
+        List<Integer> bestPath = null;
+        List<Future<Integer>> fitnessFutures = new ArrayList<>();
+        List<Future<List<Integer>>> pathFutures = new ArrayList<>();
+
         for (List<Integer> path : population) {
-            int fitness = calculateFitness(path);
-            if (fitness < bestFitness) {
-                bestFitness = fitness;
-                bestPath = path;
+            Callable<Integer> fitnessTask = () -> calculateFitness(path);
+            fitnessFutures.add(executor.submit(fitnessTask));
+            pathFutures.add(executor.submit(() -> path)); // Просто передаємо шлях для подальшого порівняння
+        }
+
+        for (int i = 0; i < population.size(); i++) {
+            try {
+                int fitness = fitnessFutures.get(i).get();
+                List<Integer> path = pathFutures.get(i).get();
+                if (fitness < bestFitness) {
+                    bestFitness = fitness;
+                    bestPath = path;
+                }
+            } catch (InterruptedException | ExecutionException e) {
+                Thread.currentThread().interrupt();
+                // Обробка помилок
             }
+        }
+        executor.shutdown(); // Завершуємо executor після використання в getBestPath
+        try {
+            executor.awaitTermination(Long.MAX_VALUE, java.util.concurrent.TimeUnit.NANOSECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
         return bestPath;
     }
 
     public static void run(int[][] graph) {
-//        String filename = "graph.txt";
-//            //generateGraphInput(filename);
-//            int[][] graph = new int[NUM_NODES][NUM_NODES];
-//            loadGraph(filename, graph);
-
         _ShortestPathGAParallel ga = new _ShortestPathGAParallel(graph);
         List<Integer> shortestPath = ga.findShortestPath();
 
-        System.out.println("Shortest path: " + shortestPath);
         System.out.println("Fitness: " + ga.calculateFitness(shortestPath));
+        System.out.println("Shortest path: " + shortestPath);
 
         if (NUM_NODES <= 20) {
             GraphVisualizer visualizer = new GraphVisualizer(graph);
             visualizer.showGraph(shortestPath);
         }
-
     }
 }

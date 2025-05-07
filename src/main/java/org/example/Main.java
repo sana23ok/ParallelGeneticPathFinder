@@ -1,7 +1,6 @@
 package org.example;
 
-import org.example.old_versions.ShortestPathGA;
-import org.example.old_versions.ShortestPathGAParallelForkJoin;
+import org.example.old_versions._ShortestPathGAParallel;
 import org.example.old_versions.ShortestPathGAParallel1;
 import org.example.old_versions.islandParallel.ShortestPathGAIslandParallel;
 
@@ -22,7 +21,7 @@ public class Main {
 
             // Measure execution time for ShortestPathGA (non-parallel)
             long startTimeGA = System.nanoTime();
-            ShortestPathGA.run(graph);
+            _ShortestPathGAParallel.run(graph);
             long endTimeGA = System.nanoTime();
             long durationGA = endTimeGA - startTimeGA;
 

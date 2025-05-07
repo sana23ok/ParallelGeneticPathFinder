@@ -1,11 +1,11 @@
 package org.example.parallel.paralellOperations;
 
-import org.example.Constants;
 import org.example.Island;
 
 import java.util.*;
-import java.util.concurrent.*;
 import java.util.stream.Collectors;
+
+import static org.example.Constants.POPULATION_SIZE;
 
 public class IslandParallel extends Island {
 
@@ -25,7 +25,7 @@ public class IslandParallel extends Island {
 
     @Override
     protected void initializePopulation() {
-        while (population.size() < Constants.POPULATION_SIZE) {
+        while (population.size() < POPULATION_SIZE) {
             List<Integer> path = generateRandomPath();
             if (isValidPath(path)) {
                 population.add(path);
@@ -35,66 +35,35 @@ public class IslandParallel extends Island {
 
     @Override
     public void evolve() {
-        List<List<Integer>> nextGeneration = new ArrayList<>();
         evaluatePopulation();
-        int NUM_THREADS = 2;
-        ExecutorService executorService = Executors.newFixedThreadPool(NUM_THREADS); // Пул потоків для паралелізму
 
-        List<Future<Void>> futures = new ArrayList<>();
-        for (int i = 0; i < population.size(); i++) {
-            final int index = i;
-            futures.add(executorService.submit(() -> {
-                List<Integer> parent1 = tournamentSelection();
-                List<Integer> parent2 = tournamentSelection();
-                List<Integer> child = crossover(parent1, parent2);
-                mutate(child);
-                if (isValidPath(child)) {
-                    synchronized (nextGeneration) {
-                        nextGeneration.add(child);
-                    }
-                } else {
-                    synchronized (nextGeneration) {
-                        nextGeneration.add(parent1);
-                    }
-                }
-                return null;
-            }));
-        }
+        List<List<Integer>> nextGeneration = population
+                .parallelStream()
+                .map(individual -> {
+                    List<Integer> parent1 = tournamentSelection();
+                    List<Integer> parent2 = tournamentSelection();
+                    List<Integer> child = crossover(parent1, parent2);
+                    mutate(child);
+                    return isValidPath(child) ? child : parent1;
+                })
+                .collect(Collectors.toList());
 
-        // Очікуємо на завершення всіх потоків
-        for (Future<Void> future : futures) {
-            try {
-                future.get(); // Чекаємо на виконання кожного потоку
-            } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
-            }
-        }
-
-        executorService.shutdown(); // Закриваємо пул потоків
         population.clear();
         population.addAll(nextGeneration);
     }
 
-    @Override
-    public List<Integer> getBestPath() {
+    public List<List<Integer>> getBestIndividuals(int count) {
         return population.stream()
-                .min(Comparator.comparingInt(this::calculateFitness))
-                .orElse(null);
+                .sorted(Comparator.comparingInt(this::calculateFitness))
+                .limit(count)
+                .toList();
     }
 
+    @Override
     public void addMigrants(List<List<Integer>> migrants) {
         for (List<Integer> migrant : migrants) {
             int index = random.nextInt(population.size());
             population.set(index, migrant);
         }
-    }
-
-    // Додаємо метод для отримання найкращих індивідуумів
-    public List<List<Integer>> getBestIndividuals(int count) {
-        // Сортуємо популяцію за найкращими результатами
-        return population.stream()
-                .sorted(Comparator.comparingInt(this::calculateFitness))
-                .limit(count)
-                .collect(Collectors.toList());
     }
 }

@@ -163,7 +163,7 @@ public class ShortestPathGA {
 //            generateGraphInput(filename);
 //            int[][] graph = new int[NUM_NODES][NUM_NODES];
 //            loadGraph(filename, graph);
-        ShortestPathGA ga = new ShortestPathGA(graph);
+        _ShortestPathGAParallel ga = new _ShortestPathGAParallel(graph);
         List<Integer> shortestPath = ga.findShortestPath();
 
         //System.out.println("Shortest path: " + shortestPath);

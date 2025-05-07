@@ -1,12 +1,12 @@
 package org.example.parallel.paralellOperations;
 
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 import static org.example.Constants.*;
 
 public class ShortestPathGAIslandParallel {
-
     private final int[][] graph;
 
     public ShortestPathGAIslandParallel(int[][] graph) {
@@ -18,36 +18,18 @@ public class ShortestPathGAIslandParallel {
 
         // Ініціалізація островів
         for (int i = 0; i < NUM_ISLANDS; i++) {
-            islands.add(new IslandParallel(graph));
+            IslandParallel island = new IslandParallel(graph);
+            island.initializePopulation(); // <-- Ініціалізує популяцію одразу після створення
+            islands.add(island);
         }
+
 
         // Еволюція поколінь
         for (int gen = 0; gen < GENERATIONS; gen++) {
-            List<Future<Void>> futures = new ArrayList<>();
-
-            int NUM_THREADS = 2;
-            ExecutorService executorService = Executors.newFixedThreadPool(NUM_THREADS); // Пул потоків для паралелізму
-
-            // Паралельна еволюція кожного острова
             for (IslandParallel island : islands) {
-                futures.add(executorService.submit(() -> {
-                    island.evolve();
-                    return null;
-                }));
+                island.evolve();  // виконується послідовно, але всередині — паралельно
             }
 
-            // Чекаємо на завершення всіх потоків
-            for (Future<Void> future : futures) {
-                try {
-                    future.get(); // Чекаємо на виконання кожного потоку
-                } catch (InterruptedException | ExecutionException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            executorService.shutdown(); // Закриваємо пул потоків
-
-            // Міграція, якщо потрібно
             if (gen > 0 && gen % MIGRATION_INTERVAL == 0) {
                 migrate(islands);
             }
@@ -76,10 +58,6 @@ public class ShortestPathGAIslandParallel {
 
         System.out.println("Fitness: " + ga.calculateFitness(shortestPath, graph));
         System.out.println("Shortest path: " + shortestPath);
-//        if (NUM_NODES <= 20) {
-//            GraphVisualizer visualizer = new GraphVisualizer(graph);
-//            visualizer.showGraph(shortestPath);
-//        }
         return shortestPath;
     }
 
