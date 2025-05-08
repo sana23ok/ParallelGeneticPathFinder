@@ -3,7 +3,6 @@ package org.example.parallel.paralellOperations;
 import org.example.Island;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -24,23 +23,6 @@ public class IslandParallel extends Island {
     protected Map<List<Integer>, Integer> createFitnessCacheMap() {
         return new HashMap<>();
     }
-
-//    @Override
-//    protected void initializePopulation() {
-//        Queue<List<Integer>> tempPopulation = new ConcurrentLinkedQueue<>();
-//
-//        IntStream.range(0, POPULATION_SIZE * 3) // з запасом, бо не всі будуть валідні
-//                .parallel()
-//                .mapToObj(i -> {
-//                    List<Integer> path = generateRandomPath();
-//                    return isValidPath(path) ? path : null;
-//                })
-//                .filter(Objects::nonNull)
-//                .limit(POPULATION_SIZE) // беремо рівно POPULATION_SIZE валідних
-//                .forEach(tempPopulation::add);
-//
-//        population = new ArrayList<>(tempPopulation);
-//    }
 
     @Override
     protected void initializePopulation() {

@@ -31,7 +31,7 @@ public class Main {
                 GraphPathChecker checkerSeq = new GraphPathChecker();
                 checkerSeq.check(filename, seqPath);
 
-            for (int i = 0; i < 4; i++) {
+            //for (int i = 0; i < 4; i++) {
 
                 System.out.printf("Time for Sequential: %.3f s%n", durationSeqIsland / 1_000_000_000.0);
 
@@ -55,7 +55,7 @@ public class Main {
                 }
 
                 System.out.println("- - - - - - - - - - - - - - - - - - - - ");
-            }
+            //}
 
         } catch (IOException e) {
             System.err.println("Error occurred while handling the graph file: " + e.getMessage());

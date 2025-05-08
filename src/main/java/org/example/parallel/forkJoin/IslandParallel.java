@@ -11,12 +11,8 @@ public class IslandParallel extends Island {
 
     public IslandParallel(int[][] graph) {
         super(graph);
-        //this.pool = Executors.newWorkStealingPool(); // або ForkJoinPool.commonPool()
-        //Required type:
-        //ForkJoinPool
-        //Provided:
-        //ExecutorService
         this.pool = ForkJoinPool.commonPool();
+        initializePopulation();
     }
 
     @Override

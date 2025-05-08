@@ -10,9 +10,9 @@ public class IslandParallel extends Island {
     public IslandParallel(int[][] graph) {
         super(graph);
         // Використовуйте змінну для кількості потоків
-        int numberOfThreads = 2;  // Тестуйте на різних значеннях
+        int numberOfThreads = 12;  // Тестуйте на різних значеннях
         this.pool = new ForkJoinPool(numberOfThreads);
-
+        initializePopulation();
     }
 
     @Override

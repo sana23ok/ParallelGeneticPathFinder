@@ -33,7 +33,7 @@ public class ShortestPathGAIslandParallel {
         this.graph = graph;
         this.forkJoinPool = forkJoinPool;
         this.islands = IntStream.range(0, Constants.NUM_ISLANDS)
-                .mapToObj(i -> new IslandParallel(graph))
+                .mapToObj(i -> new IslandParallel(graph, this.forkJoinPool))
                 .collect(java.util.stream.Collectors.toList());
 
         // Ініціалізація популяції одразу після створення островів
@@ -42,9 +42,9 @@ public class ShortestPathGAIslandParallel {
         );
     }
 
-    // Конструктор за замовчуванням (використовує NUM_ISLANDS потоків)
+    // Конструктор за замовчуванням (використовує NUM_ISLANDS*2 потоків)
     public ShortestPathGAIslandParallel(int[][] graph) {
-        this(graph, new ForkJoinPool(NUM_ISLANDS));
+        this(graph, new ForkJoinPool(NUM_ISLANDS*2));
     }
 
     public List<Integer> findShortestPath() {
@@ -105,6 +105,6 @@ public class ShortestPathGAIslandParallel {
 
     // Залишаємо існуючий статичний метод run для сумісності (використовує NUM_ISLANDS потоків)
     public static List<Integer> run(int[][] graph) {
-        return run(graph, NUM_ISLANDS);
+        return run(graph, NUM_ISLANDS*2);
     }
 }
