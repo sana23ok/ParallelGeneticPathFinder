@@ -68,7 +68,7 @@ public class Test {
 
                 // Measure execution time for ShortestPathGAIslandParallel
                 long startIsland = System.nanoTime();
-                List<Integer> paralelPath = org.example.parallel.finalVersion.ShortestPathGAIslandParallel.run(graph);
+                List<Integer> paralelPath = org.example.parallel.finalVersion.ShortestPathGAIslandParallel.run(graph, 12);
                 long endIsland = System.nanoTime();
                 long durationIsland = endIsland - startIsland;
 
