@@ -30,7 +30,7 @@ public class IslandParallel extends Island {
 
     @Override
     protected void initializePopulation() {
-        //System.out.println("initializePopulation() running in " + Thread.currentThread().getName());
+        System.out.println("initializePopulation() running in " + Thread.currentThread().getName());
         try {
             pool.submit(() ->
                     IntStream.range(0, POPULATION_SIZE).parallel().forEach(i -> {
@@ -51,7 +51,7 @@ public class IslandParallel extends Island {
 
     @Override
     public void evolve() {
-        //System.out.println("evolve() child creation in " + Thread.currentThread().getName());
+        System.out.println("evolve() child creation in " + Thread.currentThread().getName());
         //System.out.println("Island " + this + " running in " + Thread.currentThread().getName());
         List<List<Integer>> nextGeneration = new CopyOnWriteArrayList<>();
 
@@ -84,7 +84,7 @@ public class IslandParallel extends Island {
 
     @Override
     protected void evaluatePopulation() {
-        //System.out.println("evaluatePopulation() running in " + Thread.currentThread().getName());
+        System.out.println("evaluatePopulation() running in " + Thread.currentThread().getName());
         try {
             pool.submit(() -> population.parallelStream().forEach(this::calculateFitness)).get();
         } catch (InterruptedException | ExecutionException e) {
