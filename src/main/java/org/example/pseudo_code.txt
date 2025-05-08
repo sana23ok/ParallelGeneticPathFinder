@@ -1,0 +1,71 @@
+run:
+  parameters:
+    graph
+  steps:
+    initialize: constructor of ShortestPath class with graph
+    call: findShortestPath()
+
+findShortestPath:
+  steps:
+    initialize: list of Island class instances
+    loop: for each generation
+      steps:
+        loop: for each island
+          steps:
+            call: evolve()
+        condition: if generation % MIGRATION_INTERVAL == 0
+          steps:
+            call: migrate() with islands
+    return: best path among all islands (based on fitness)
+
+evolve:
+  steps:
+    call: evaluatePopulation()
+    loop: for each individual in population
+      steps:
+        assign: parent1 = tournamentSelection()
+        assign: parent2 = tournamentSelection()
+        assign: child = crossover(parent1, parent2)
+        call: mutate() with child
+        condition: if isValidPath(child)
+          steps:
+            add: child to nextGeneration
+        else:
+            add: parent1 to nextGeneration
+    replace: current population with nextGeneration
+
+migrate:
+  parameters:
+    islands
+  steps:
+    loop: for each island i
+      steps:
+        assign: source = island[i]
+        assign: target = island[(i + 1) % total_islands]
+        assign: migrants = source.getBestIndividuals(MIGRATION_COUNT)
+        call: target.addMigrants() with migrants
+
+calculateFitness:
+  parameters:
+    path
+    graph
+  steps:
+    initialize: fitness = 0
+    loop: for each i in path
+      steps:
+        increment: fitness += graph[path[i]][path[i+1]]
+    return: fitness
+
+
+Початок
+ └──> Створення NUM_ISLANDS островів
+         └──> Кожен острів паралельно ініціалізує популяцію
+         └──> Для кожного покоління:
+               └──> Паралельна еволюція кожного острова
+                    └──> Всередині острова: паралельний відбір, кросовер, мутація
+               └──> Якщо потрібна міграція:
+                    ├──> Збір мігрантів паралельно
+                    └──> Вставка мігрантів послідовно
+ └──> Вибір найкращого шляху серед островів паралельно
+Кінець
+

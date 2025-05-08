@@ -1,45 +1,36 @@
 package org.example;
 
 import java.util.*;
-import java.util.concurrent.ForkJoinPool;
 
 public abstract class Island {
-
     protected final int[][] graph;
     protected final int startNode = 0;
     protected final int endNode = Constants.NUM_NODES / 2 + 1;
     protected final Random random = new Random();
     protected List<List<Integer>> population;
     protected Map<List<Integer>, Integer> fitnessCache;
-    protected ForkJoinPool pool;
-
 
     public Island(int[][] graph) {
         this.graph = graph;
         this.population = createPopulationList();
         this.fitnessCache = createFitnessCacheMap();
-        //initializePopulation();
     }
-
 
     protected abstract List<List<Integer>> createPopulationList();
 
-
     protected abstract Map<List<Integer>, Integer> createFitnessCacheMap();
-
 
     protected abstract void initializePopulation();
 
-
     public abstract void evolve();
 
+    public abstract void addMigrants(List<List<Integer>> lists);
 
     public List<Integer> getBestPath() {
         return population.stream()
                 .min(Comparator.comparingInt(this::calculateFitness))
                 .orElse(null);
     }
-
 
     protected List<Integer> generateRandomPath() {
         List<Integer> path = new ArrayList<>();
@@ -58,7 +49,6 @@ public abstract class Island {
         return path;
     }
 
-
     protected List<Integer> getNeighbors(int node) {
         List<Integer> neighbors = new ArrayList<>();
         for (int i = 0; i < graph.length; i++) {
@@ -66,7 +56,6 @@ public abstract class Island {
         }
         return neighbors;
     }
-
 
     protected boolean isValidPath(List<Integer> path) {
         if (path.get(0) != startNode || path.get(path.size() - 1) != endNode) return false;
@@ -76,11 +65,9 @@ public abstract class Island {
         return true;
     }
 
-
     protected void evaluatePopulation() {
         population.forEach(this::calculateFitness);
     }
-
 
     protected List<Integer> tournamentSelection() {
         List<Integer> best = null;
@@ -96,7 +83,6 @@ public abstract class Island {
         }
         return best;
     }
-
 
     protected List<Integer> crossover(List<Integer> parent1, List<Integer> parent2) {
         Set<Integer> visited = new HashSet<>();
@@ -116,7 +102,6 @@ public abstract class Island {
         return child;
     }
 
-
     protected void mutate(List<Integer> path) {
         if (random.nextDouble() < Constants.MUTATION_RATE && path.size() > 2) {
             int index1 = 1 + random.nextInt(path.size() - 2);
@@ -124,7 +109,6 @@ public abstract class Island {
             Collections.swap(path, index1, index2);
         }
     }
-
 
     protected int calculateFitness(List<Integer> path) {
         return fitnessCache.computeIfAbsent(path, p -> {
@@ -135,6 +119,4 @@ public abstract class Island {
             return fitness;
         });
     }
-
-    public abstract void addMigrants(List<List<Integer>> lists);
 }

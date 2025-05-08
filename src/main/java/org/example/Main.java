@@ -1,8 +1,7 @@
 package org.example;
 
-import org.example.old_versions._ShortestPathGAParallel;
-import org.example.old_versions.ShortestPathGAParallel1;
-import org.example.old_versions.islandParallel.ShortestPathGAIslandParallel;
+import org.example.parallel.finalVersion.ShortestPathGAIslandParallel;
+import org.example.sequential.ShortestPathGAIslandSequential;
 
 import java.io.IOException;
 import static org.example.Constants.NUM_NODES;
@@ -21,33 +20,15 @@ public class Main {
 
             // Measure execution time for ShortestPathGA (non-parallel)
             long startTimeGA = System.nanoTime();
-            _ShortestPathGAParallel.run(graph);
+            ShortestPathGAIslandSequential.run(graph);
             long endTimeGA = System.nanoTime();
             long durationGA = endTimeGA - startTimeGA;
 
             System.out.println("Time for Sequential: " + durationGA + " ns");
 
-//            // Measure execution time for ShortestPathGAParallel (parallel)
-//            long startTimeGAParallel = System.nanoTime();
-//            ShortestPathGAParallel.run(graph);
-//            long endTimeGAParallel = System.nanoTime();
-//            long durationGAParallel = endTimeGAParallel - startTimeGAParallel;
-//
-//            // Output results
-//            System.out.println("Time for Parallel: " + durationGAParallel + " ns");
-//
-//            // Calculate speedup
-//            if (durationGA != 0) {
-//                double speedup = (double) durationGA / durationGAParallel;
-//                System.out.println("Speedup: " + speedup);
-//            } else {
-//                System.out.println("Time for Sequential ShortestPathGA is too small to calculate speedup.");
-//            }
-//            System.out.println("-------------------------------");
-//
             // Measure execution time for ShortestPathGAParallel (parallel)
             long startTimeGAParallel1 = System.nanoTime();
-            ShortestPathGAParallel1.run(graph);
+            ShortestPathGAIslandParallel.run(graph);
             long endTimeGAParallel1 = System.nanoTime();
             long durationGAParallel1 = endTimeGAParallel1 - startTimeGAParallel1;
 

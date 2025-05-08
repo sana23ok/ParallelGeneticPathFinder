@@ -19,6 +19,7 @@ dependencies {
     // Робочі версії GraphStream
     implementation 'org.graphstream:gs-core:1.3'
     implementation 'org.graphstream:gs-ui:1.3'
+    //implementation 'org.jgrapht:jgraph-core:1.5.2'
 }
 
 test {

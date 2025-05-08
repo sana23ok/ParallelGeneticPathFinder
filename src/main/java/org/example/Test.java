@@ -33,7 +33,7 @@ public class Test {
 
                 // Parallel run0
                 long startIslandPr = System.nanoTime();
-                List<Integer> paralelPathPr = org.example.parallel.forkJoin.ShortestPathGAIslandParallel.run(graph);
+                List<Integer> paralelPathPr = org.example.parallel.parallelIslands.ShortestPathGAIslandParallel.run(graph);
                 long endIslandPr = System.nanoTime();
                 long durationIslandPr = endIslandPr - startIslandPr;
 
@@ -68,7 +68,7 @@ public class Test {
 
                 // Measure execution time for ShortestPathGAIslandParallel
                 long startIsland = System.nanoTime();
-                List<Integer> paralelPath = org.example.parallel.parallelStream.ShortestPathGAIslandParallel.run(graph);
+                List<Integer> paralelPath = org.example.parallel.finalVersion.ShortestPathGAIslandParallel.run(graph);
                 long endIsland = System.nanoTime();
                 long durationIsland = endIsland - startIsland;
 

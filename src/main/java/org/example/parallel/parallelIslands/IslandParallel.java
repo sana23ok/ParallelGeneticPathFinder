@@ -1,33 +1,32 @@
 package org.example.parallel.parallelIslands;
 
-import org.example.Constants;
 import org.example.Island;
 import java.util.*;
 import java.util.concurrent.*;
+import static org.example.Constants.*;
 
 public class IslandParallel extends Island {
+    private ForkJoinPool pool;
 
     public IslandParallel(int[][] graph) {
         super(graph);
-        // Використовуйте змінну для кількості потоків
-        int numberOfThreads = 12;  // Тестуйте на різних значеннях
-        this.pool = new ForkJoinPool(numberOfThreads);
+        this.pool = ForkJoinPool.commonPool();
         initializePopulation();
     }
 
     @Override
     protected List<List<Integer>> createPopulationList() {
-        return new ArrayList<>();
+        return Collections.synchronizedList(new ArrayList<>());
     }
 
     @Override
     protected Map<List<Integer>, Integer> createFitnessCacheMap() {
-        return new HashMap<>();
+        return new ConcurrentHashMap<>();
     }
 
     @Override
     protected void initializePopulation() {
-        while (population.size() < Constants.POPULATION_SIZE) {
+        while (population.size() < POPULATION_SIZE) {
             List<Integer> path = generateRandomPath();
             if (isValidPath(path)) {
                 population.add(path);
@@ -37,39 +36,35 @@ public class IslandParallel extends Island {
 
     @Override
     public void evolve() {
-        List<List<Integer>> nextGeneration = new ArrayList<>();
         evaluatePopulation();
 
-        // Паралельно еволюціонуємо популяцію
-        List<Callable<Void>> tasks = new ArrayList<>();
+        List<Callable<List<Integer>>> tasks = new ArrayList<>();
         for (int i = 0; i < population.size(); i++) {
-            final int index = i;
             tasks.add(() -> {
                 List<Integer> parent1 = tournamentSelection();
                 List<Integer> parent2 = tournamentSelection();
                 List<Integer> child = crossover(parent1, parent2);
                 mutate(child);
-                if (isValidPath(child)) {
-                    synchronized (population) {
-                        nextGeneration.add(child);
-                    }
-                } else {
-                    synchronized (population) {
-                        nextGeneration.add(parent1);
-                    }
-                }
-                return null;
+                return isValidPath(child) ? child : parent1;
             });
         }
 
         try {
-            pool.invokeAll(tasks); // виконуємо всі завдання паралельно
-        } catch (InterruptedException e) {
+            List<Future<List<Integer>>> futures = ((ExecutorService) pool).invokeAll(tasks);
+            List<List<Integer>> nextGeneration = new ArrayList<>();
+            for (Future<List<Integer>> future : futures) {
+                nextGeneration.add(future.get());
+            }
+            population.clear();
+            population.addAll(nextGeneration);
+        } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
+    }
 
-        population.clear();
-        population.addAll(nextGeneration);
+    @Override
+    protected void evaluatePopulation() {
+        population.parallelStream().forEach(this::calculateFitness);
     }
 
     public List<List<Integer>> getBestIndividuals(int count) {
@@ -79,10 +74,11 @@ public class IslandParallel extends Island {
                 .toList();
     }
 
+    @Override
     public void addMigrants(List<List<Integer>> migrants) {
-        for (List<Integer> migrant : migrants) {
+        migrants.parallelStream().forEach(migrant -> {
             int index = random.nextInt(population.size());
             population.set(index, migrant);
-        }
+        });
     }
 }
