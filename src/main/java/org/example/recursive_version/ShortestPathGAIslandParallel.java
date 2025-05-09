@@ -19,8 +19,9 @@ public class ShortestPathGAIslandParallel {
     }
 
     public List<Integer> findShortestPathParallel() {
+        int threadsNum = NUM_ISLANDS*2;
         List<IslandParallel> islands = new ArrayList<>(NUM_ISLANDS);
-        ExecutorService islandExecutor = Executors.newFixedThreadPool(NUM_ISLANDS);
+        ExecutorService islandExecutor = Executors.newFixedThreadPool(threadsNum);
 
         // Паралельна ініціалізація островів
         List<java.util.concurrent.Future<?>> islandFutures = IntStream.range(0, NUM_ISLANDS)

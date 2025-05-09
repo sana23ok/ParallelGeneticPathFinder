@@ -86,18 +86,18 @@ public class IslandParallel extends Island {
         tasks.forEach(pool::invoke);
     }
 
-    private class FitnessCalculationTask extends RecursiveAction {
-        private final List<Integer> path;
-
-        public FitnessCalculationTask(List<Integer> path) {
-            this.path = Collections.unmodifiableList(path);
-        }
-
-        @Override
-        protected void compute() {
-            calculateFitness(path);
-        }
-    }
+//    private class FitnessCalculationTask extends RecursiveAction {
+//        private final List<Integer> path;
+//
+//        public FitnessCalculationTask(List<Integer> path) {
+//            this.path = Collections.unmodifiableList(path);
+//        }
+//
+//        @Override
+//        protected void compute() {
+//            calculateFitness(path);
+//        }
+//    }
 
     public List<List<Integer>> getBestIndividuals(int count) {
         return population.stream()

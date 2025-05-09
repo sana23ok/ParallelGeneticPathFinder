@@ -85,6 +85,25 @@ public class Test {
                     System.out.println("Time for Parallel is too small to calculate speedup.");
                 }
 
+                // Measure execution time for ShortestPathGAIslandParallel
+                long startIslandRecursive = System.nanoTime();
+                List<Integer> paralelPathRecursive = org.example.recursive_version.ShortestPathGAIslandParallel.run(graph);
+                long endIslandRecursive = System.nanoTime();
+                long durationIslandRecursive = endIslandRecursive - startIslandRecursive;
+
+                GraphPathChecker checkerParRecursive = new GraphPathChecker();
+                checkerParRecursive.check(filename, paralelPathRecursive);
+
+                System.out.printf("Time for Parallel Recursive Version: %.3f s%n", durationIslandRecursive / 1_000_000_000.0);
+
+                // Calculate speedup
+                if (durationIslandRecursive != 0) {
+                    double speedup = (double) durationSeqIsland / durationIslandRecursive;
+                    System.out.printf("Speedup: %.2f%n", speedup);
+                } else {
+                    System.out.println("Time for Parallel is too small to calculate speedup.");
+                }
+
                 System.out.println("-----------------------------------------");
                 System.out.println("-----------------------------------------");
             }
