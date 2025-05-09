@@ -106,7 +106,7 @@ public class IslandParallel extends Island {
         try {
             return pool.submit(() ->
                     population.parallelStream()
-                            .sorted(Comparator.comparingInt(this::calculateFitness))
+                            .sorted(Comparator.comparingInt(this::calculateFitness))//sorted блокуюча?
                             .limit(count)
                             .collect(Collectors.toList())
             ).get();

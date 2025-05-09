@@ -13,7 +13,7 @@ public class Test {
         String filename = "graph.txt";
         try {
             // Generate graph input file
-            generateGraphInput(filename);
+            //generateGraphInput(filename);
 
             // Load graph into memory
             int[][] graph = new int[NUM_NODES][NUM_NODES];
@@ -85,6 +85,7 @@ public class Test {
                     System.out.println("Time for Parallel is too small to calculate speedup.");
                 }
 
+                System.out.println("- - - - - - - - - - - - - - - - - - - - ");
                 // Measure execution time for ShortestPathGAIslandParallel
                 long startIslandRecursive = System.nanoTime();
                 List<Integer> paralelPathRecursive = org.example.recursive_version.ShortestPathGAIslandParallel.run(graph);

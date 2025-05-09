@@ -1,12 +1,8 @@
 package org.example.recursive_version;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.example.Constants.*;
@@ -19,16 +15,22 @@ public class ShortestPathGAIslandParallel {
     }
 
     public List<Integer> findShortestPathParallel() {
-        int threadsNum = NUM_ISLANDS*2;
-        List<IslandParallel> islands = new ArrayList<>(NUM_ISLANDS);
+        int threadsNum = NUM_ISLANDS * 2 * 2;
         ExecutorService islandExecutor = Executors.newFixedThreadPool(threadsNum);
 
-        // Паралельна ініціалізація островів
-        List<java.util.concurrent.Future<?>> islandFutures = IntStream.range(0, NUM_ISLANDS)
-                .mapToObj(i -> islandExecutor.submit(() -> islands.add(new IslandParallel(graph))))
-                .collect(java.util.stream.Collectors.toList());
+        // 🛠 Безпечне попереднє створення списку з null
+        List<IslandParallel> islands = new ArrayList<>(Collections.nCopies(NUM_ISLANDS, null));
 
-        for (java.util.concurrent.Future<?> future : islandFutures) {
+        // ✅ Потокобезпечне створення островів з використанням унікального індексу
+        List<Future<?>> islandFutures = IntStream.range(0, NUM_ISLANDS)
+                .mapToObj(i -> islandExecutor.submit(() -> {
+                    IslandParallel island = new IslandParallel(graph, islandExecutor); //Expected 2 arguments but found 1
+                    islands.set(i, island);  // кожен потік пише у свій індекс
+                }))
+                .collect(Collectors.toList());
+
+        // Очікування завершення ініціалізації островів
+        for (Future<?> future : islandFutures) {
             try {
                 future.get();
             } catch (Exception e) {
@@ -36,15 +38,14 @@ public class ShortestPathGAIslandParallel {
             }
         }
 
-        // Еволюція поколінь
+        // 🔁 Еволюція поколінь
         for (int gen = 0; gen < GENERATIONS; gen++) {
-            List<java.util.concurrent.Future<?>> evolutionFutures = new ArrayList<>();
+            List<Future<?>> evolutionFutures = new ArrayList<>();
             for (IslandParallel island : islands) {
                 evolutionFutures.add(islandExecutor.submit(island::evolve));
             }
 
-            // Очікування завершення еволюції на всіх островах
-            for (java.util.concurrent.Future<?> future : evolutionFutures) {
+            for (Future<?> future : evolutionFutures) {
                 try {
                     future.get();
                 } catch (Exception e) {
@@ -64,13 +65,14 @@ public class ShortestPathGAIslandParallel {
             Thread.currentThread().interrupt();
         }
 
-        // Знаходимо найкращий шлях серед усіх островів
+        // 🔍 Пошук найкращого шляху серед усіх островів
         return islands.stream()
                 .map(IslandParallel::getBestPath)
                 .filter(Objects::nonNull)
                 .min(Comparator.comparingInt(p -> calculateFitness(p, graph)))
                 .orElse(null);
     }
+
 
     private void migrate(List<IslandParallel> islands) {
         for (int i = 0; i < islands.size(); i++) {

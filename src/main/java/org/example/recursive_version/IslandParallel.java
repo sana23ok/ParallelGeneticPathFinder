@@ -4,18 +4,18 @@ import org.example.Constants;
 import org.example.Island;
 
 import java.util.*;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.RecursiveAction;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 import java.util.stream.IntStream;
 import java.util.stream.Collectors;
 
 public class IslandParallel extends Island {
+    private final ExecutorService executor;
 
-    private final ForkJoinPool pool;
-
-    public IslandParallel(int[][] graph) {
+    public IslandParallel(int[][] graph, ExecutorService executor) {
         super(graph);
-        this.pool = new ForkJoinPool();
+        this.executor = executor;
         initializePopulation();
     }
 
@@ -30,74 +30,63 @@ public class IslandParallel extends Island {
     }
 
     protected void initializePopulation() {
-        List<RecursiveAction> tasks = IntStream.range(0, Constants.POPULATION_SIZE)
-                .mapToObj(i -> new RecursiveAction() {
-                    @Override
-                    protected void compute() {
-                        List<Integer> path = generateRandomPath();
-                        if (isValidPath(path)) {
-                            synchronized (population) {
-                                population.add(path);
-                            }
+        List<Callable<Void>> tasks = IntStream.range(0, Constants.POPULATION_SIZE)
+                .mapToObj(i -> (Callable<Void>) () -> {
+                    List<Integer> path = generateRandomPath();
+                    if (isValidPath(path)) {
+                        synchronized (population) {
+                            population.add(path);
                         }
                     }
-                })
-                .collect(Collectors.toList());
+                    return null;
+                }).collect(Collectors.toList());
 
-        tasks.forEach(pool::invoke);
+        try {
+            executor.invokeAll(tasks);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     @Override
     public void evolve() {
-        List<List<Integer>> nextGeneration = new ArrayList<>(population.size());
+        List<List<Integer>> nextGeneration = Collections.synchronizedList(new ArrayList<>(population.size()));
         evaluatePopulationParallel();
 
-        List<RecursiveAction> evolutionTasks = IntStream.range(0, population.size())
-                .mapToObj(i -> new RecursiveAction() {
-                    @Override
-                    protected void compute() {
-                        List<Integer> parent1 = tournamentSelection();
-                        List<Integer> parent2 = tournamentSelection();
-                        List<Integer> child = crossover(parent1, parent2);
-                        mutate(child);
-                        List<Integer> individualToAdd = isValidPath(child) ? child : new ArrayList<>(parent1);
-                        synchronized (nextGeneration) {
-                            nextGeneration.add(individualToAdd);
-                        }
-                    }
-                })
-                .collect(Collectors.toList());
+        List<Callable<Void>> evolutionTasks = IntStream.range(0, population.size())
+                .mapToObj(i -> (Callable<Void>) () -> {
+                    List<Integer> parent1 = tournamentSelection();
+                    List<Integer> parent2 = tournamentSelection();
+                    List<Integer> child = crossover(parent1, parent2);
+                    mutate(child);
+                    List<Integer> individualToAdd = isValidPath(child) ? child : new ArrayList<>(parent1);
+                    nextGeneration.add(individualToAdd);
+                    return null;
+                }).collect(Collectors.toList());
 
-        evolutionTasks.forEach(pool::invoke);
+        try {
+            executor.invokeAll(evolutionTasks);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
 
         population.clear();
         population.addAll(nextGeneration);
     }
 
     private void evaluatePopulationParallel() {
-        List<RecursiveAction> tasks = population.stream()
-                .map(individual -> new RecursiveAction() {
-                    @Override
-                    protected void compute() {
-                        calculateFitness(individual);
-                    }
-                })
-                .collect(Collectors.toList());
-        tasks.forEach(pool::invoke);
-    }
+        List<Callable<Void>> fitnessTasks = population.stream()
+                .map(individual -> (Callable<Void>) () -> {
+                    calculateFitness(individual);
+                    return null;
+                }).collect(Collectors.toList());
 
-//    private class FitnessCalculationTask extends RecursiveAction {
-//        private final List<Integer> path;
-//
-//        public FitnessCalculationTask(List<Integer> path) {
-//            this.path = Collections.unmodifiableList(path);
-//        }
-//
-//        @Override
-//        protected void compute() {
-//            calculateFitness(path);
-//        }
-//    }
+        try {
+            executor.invokeAll(fitnessTasks);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
 
     public List<List<Integer>> getBestIndividuals(int count) {
         return population.stream()
