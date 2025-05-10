@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.List;
 import static org.example.graph.GraphUtils.*;
 import org.example.graph.GraphPathChecker;
-import org.example.parallel.finalVersion.ShortestPathGAIslandParallel;
+import org.example.parallel.fork_version.ShortestPathGAIslandParallel;
 import org.example.sequential.ShortestPathGAIslandSequential;
 import java.io.File;
 

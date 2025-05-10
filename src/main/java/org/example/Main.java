@@ -1,6 +1,6 @@
 package org.example;
 
-import org.example.parallel.finalVersion.ShortestPathGAIslandParallel;
+import org.example.executor_version.ShortestPathGAIslandParallel;
 import org.example.sequential.ShortestPathGAIslandSequential;
 
 import java.io.IOException;
@@ -11,6 +11,7 @@ public class Main {
     public static void main(String[] args) {
         String filename = "graph.txt";
         try {
+            System.out.println("Nodes: " + NUM_NODES);
             // Generate graph input file
             generateGraphInput(filename);
 
@@ -27,21 +28,6 @@ public class Main {
             System.out.println("Time for Sequential: " + durationGA + " ns");
 
             // Measure execution time for ShortestPathGAParallel (parallel)
-            long startTimeGAParallel1 = System.nanoTime();
-            ShortestPathGAIslandParallel.run(graph);
-            long endTimeGAParallel1 = System.nanoTime();
-            long durationGAParallel1 = endTimeGAParallel1 - startTimeGAParallel1;
-
-            // Calculate speedup
-            if (durationGA != 0) {
-                double speedup = (double) durationGA / durationGAParallel1;
-                System.out.println("Speedup 1: " + speedup);
-            } else {
-                System.out.println("Time for Sequential ShortestPathGA is too small to calculate speedup.");
-            }
-            System.out.println("-------------------------------");
-
-            // Measure execution time for ShortestPathGAParallel (parallel)
             long startIsland = System.nanoTime();
             ShortestPathGAIslandParallel.run(graph);
             long endIsland = System.nanoTime();
@@ -50,7 +36,7 @@ public class Main {
             // Calculate speedup
             if (durationGA != 0) {
                 double speedup = (double) durationGA / durationIsland;
-                System.out.println("Speedup Island: " + speedup);
+                System.out.println("Speedup: " + speedup);
             } else {
                 System.out.println("Time for Sequential ShortestPathGA is too small to calculate speedup.");
             }

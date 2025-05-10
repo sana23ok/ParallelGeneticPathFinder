@@ -29,13 +29,13 @@ public class IslandParallel extends Island {
     }
 
     protected void initializePopulation() {
+        List<List<Integer>> populationSafe = Collections.synchronizedList(new ArrayList<>());
+
         List<Callable<Void>> tasks = IntStream.range(0, Constants.POPULATION_SIZE)
                 .mapToObj(i -> (Callable<Void>) () -> {
                     List<Integer> path = generateRandomPath();
                     if (isValidPath(path)) {
-                        synchronized (population) {
-                            population.add(path);
-                        }
+                        populationSafe.add(path);
                     }
                     return null;
                 }).collect(Collectors.toList());
@@ -45,6 +45,9 @@ public class IslandParallel extends Island {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
+
+        population = populationSafe;
+
     }
 
     @Override

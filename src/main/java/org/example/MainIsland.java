@@ -2,7 +2,7 @@ package org.example;
 
 import org.example.graph.GraphPathChecker;
 import org.example.sequential.ShortestPathGAIslandSequential;
-import org.example.parallel.finalVersion.ShortestPathGAIslandParallel;
+import org.example.parallel.fork_version.ShortestPathGAIslandParallel;
 
 import java.io.IOException;
 import java.util.List;
