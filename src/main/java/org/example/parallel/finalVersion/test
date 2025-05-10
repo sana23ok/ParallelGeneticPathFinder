@@ -30,6 +30,7 @@ public class IslandParallel extends Island {
 
     @Override
     protected void initializePopulation() {
+        //System.out.println("initializePopulation() running in " + Thread.currentThread().getName());
         try {
             pool.submit(() ->
                     IntStream.range(0, POPULATION_SIZE).parallel().forEach(i -> {
@@ -50,6 +51,8 @@ public class IslandParallel extends Island {
 
     @Override
     public void evolve() {
+        //System.out.println("evolve() child creation in " + Thread.currentThread().getName());
+        //System.out.println("Island " + this + " running in " + Thread.currentThread().getName());
         List<List<Integer>> nextGeneration = new CopyOnWriteArrayList<>();
 
         evaluatePopulation();
@@ -81,6 +84,7 @@ public class IslandParallel extends Island {
 
     @Override
     protected void evaluatePopulation() {
+        //System.out.println("evaluatePopulation() running in " + Thread.currentThread().getName());
         try {
             pool.submit(() -> population.parallelStream().forEach(this::calculateFitness)).get();
         } catch (InterruptedException | ExecutionException e) {
@@ -101,8 +105,8 @@ public class IslandParallel extends Island {
     public List<List<Integer>> getBestIndividuals(int count) {
         try {
             return pool.submit(() ->
-                    population.stream()
-                            .sorted(Comparator.comparingInt(this::calculateFitness))
+                    population.parallelStream()
+                            .sorted(Comparator.comparingInt(this::calculateFitness))//sorted блокуюча?
                             .limit(count)
                             .collect(Collectors.toList())
             ).get();
@@ -119,6 +123,7 @@ public class IslandParallel extends Island {
         }
     }
 }
+
 
 
 package org.example.parallel.finalVersion;
@@ -228,6 +233,6 @@ public class ShortestPathGAIslandParallel {
 
     // Залишаємо існуючий статичний метод run для сумісності (використовує NUM_ISLANDS потоків)
     public static List<Integer> run(int[][] graph) {
-        return run(graph, NUM_ISLANDS);
+        return run(graph, NUM_ISLANDS*2);
     }
 }
