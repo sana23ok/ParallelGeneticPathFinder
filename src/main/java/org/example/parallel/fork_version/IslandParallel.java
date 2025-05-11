@@ -73,7 +73,6 @@ public class IslandParallel extends Island {
             throw new RuntimeException("evolve failed", e);
         }
 
-        // Заміна старої популяції новою без synchronized
         population = nextGeneration;
     }
 
@@ -89,14 +88,14 @@ public class IslandParallel extends Island {
         }
     }
 
-    @Override
-    protected List<Integer> tournamentSelection() {
-        // tournamentSelection itself is single-threaded, so no change
-        return IntStream.range(0, TOURNAMENT_SIZE)
-                .mapToObj(i -> population.get(random.nextInt(population.size())))
-                .min(Comparator.comparingInt(this::calculateFitness))
-                .orElse(population.get(0));
-    }
+//    @Override
+//    protected List<Integer> tournamentSelection() {
+//        // tournamentSelection itself is single-threaded, so no change
+//        return IntStream.range(0, TOURNAMENT_SIZE)
+//                .mapToObj(i -> population.get(random.nextInt(population.size())))
+//                .min(Comparator.comparingInt(this::calculateFitness))
+//                .orElse(population.get(0));
+//    }
 
     public List<List<Integer>> getBestIndividuals(int count) {
         try {

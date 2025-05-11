@@ -52,7 +52,6 @@ public class ShortestPathGAIslandParallel {
     }
 
 
-
     private void migrate(List<IslandParallel> islands) {
         for (int i = 0; i < islands.size(); i++) {
             IslandParallel source = islands.get(i);
