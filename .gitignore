@@ -16,6 +16,7 @@ out/
 !**/src/main/**/out/
 !**/src/test/**/out/
 src/main/java/org/example/txt/
+src/main/java/org/example/old_versions
 
 ### Eclipse ###
 .apt_generated
