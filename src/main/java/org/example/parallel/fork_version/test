@@ -1,4 +1,4 @@
-package org.example.parallel.fork_version;
+package org.example.old_versions.parallel_old.fork_version;
 
 import org.example.Island;
 
@@ -126,7 +126,7 @@ public class IslandParallel extends Island {
 
 
 
-package org.example.parallel.fork_version;
+package org.example.old_versions.parallel_old.fork_version;
 
 import org.example.Constants;
 import org.example.graph.GraphVisualizer;

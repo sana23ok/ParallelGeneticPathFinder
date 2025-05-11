@@ -93,8 +93,8 @@ public class ShortestPathGAIslandParallel {
         List<Integer> shortestPath = ga.findShortestPath();
         customPool.shutdown(); // Важливо вимкнути пул після використання
 
-        System.out.println("Fitness (threads: " + numThreads + "): " + ga.calculateFitness(shortestPath, graph));
-        System.out.println("Shortest path (threads: " + numThreads + "): " + shortestPath);
+        //System.out.println("Fitness (threads: " + numThreads + "): " + ga.calculateFitness(shortestPath, graph));
+        //System.out.println("Shortest path (threads: " + numThreads + "): " + shortestPath);
 
         if (NUM_NODES <= 20) {
             GraphVisualizer visualizer = new GraphVisualizer(graph);

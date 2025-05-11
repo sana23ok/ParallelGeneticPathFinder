@@ -1,7 +1,7 @@
 package org.example;
 
 import org.example.graph.GraphPathChecker;
-import org.example.parallel.paralellOperations.ShortestPathGAIslandParallel;
+import org.example.old_versions.parallel_old.paralellOperations.ShortestPathGAIslandParallel;
 import org.example.sequential.ShortestPathGAIslandSequential;
 import java.io.IOException;
 import java.util.List;
@@ -33,7 +33,7 @@ public class Test {
 
                 // Parallel run0
                 long startIslandPr = System.nanoTime();
-                List<Integer> paralelPathPr = org.example.parallel.parallelIslands.ShortestPathGAIslandParallel.run(graph);
+                List<Integer> paralelPathPr = org.example.old_versions.parallel_old.parallelIslands.ShortestPathGAIslandParallel.run(graph);
                 long endIslandPr = System.nanoTime();
                 long durationIslandPr = endIslandPr - startIslandPr;
 
@@ -88,7 +88,7 @@ public class Test {
                 System.out.println("- - - - - - - - - - - - - - - - - - - - ");
                 // Measure execution time for ShortestPathGAIslandParallel
                 long startIslandRecursive = System.nanoTime();
-                List<Integer> paralelPathRecursive = org.example.executor_version.ShortestPathGAIslandParallel.run(graph);
+                List<Integer> paralelPathRecursive = org.example.parallel.executor_version.ShortestPathGAIslandParallel.run(graph, 12);
                 long endIslandRecursive = System.nanoTime();
                 long durationIslandRecursive = endIslandRecursive - startIslandRecursive;
 

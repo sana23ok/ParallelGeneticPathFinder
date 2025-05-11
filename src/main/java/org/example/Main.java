@@ -1,6 +1,7 @@
 package org.example;
 
-import org.example.executor_version.ShortestPathGAIslandParallel;
+import org.example.parallel.executor_version.ShortestPathGAIslandParallel;
+//import org.example.parallel.fork_version.ShortestPathGAIslandParallel;
 import org.example.sequential.ShortestPathGAIslandSequential;
 
 import java.io.IOException;
@@ -29,7 +30,7 @@ public class Main {
 
             // Measure execution time for ShortestPathGAParallel (parallel)
             long startIsland = System.nanoTime();
-            ShortestPathGAIslandParallel.run(graph);
+            ShortestPathGAIslandParallel.run(graph, 12);
             long endIsland = System.nanoTime();
             long durationIsland = endIsland- startIsland;
 
