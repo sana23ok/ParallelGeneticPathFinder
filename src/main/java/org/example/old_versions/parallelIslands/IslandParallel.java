@@ -1,4 +1,4 @@
-package org.example.old_versions.parallel_old.parallelIslands;
+package org.example.old_versions.parallelIslands;
 
 import org.example.Island;
 import java.util.*;

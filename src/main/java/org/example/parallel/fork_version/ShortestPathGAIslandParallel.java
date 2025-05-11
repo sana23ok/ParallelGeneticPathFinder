@@ -7,8 +7,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
 import static org.example.Constants.*;
+
 
 class ParallelExecutor {
     public static void runInCustomPool(ForkJoinPool pool, Runnable task) {
@@ -40,11 +40,6 @@ public class ShortestPathGAIslandParallel {
         ParallelExecutor.runInCustomPool(forkJoinPool, () ->
                 islands.parallelStream().forEach(IslandParallel::initializePopulation)
         );
-    }
-
-    // Конструктор за замовчуванням (використовує NUM_ISLANDS*2 потоків)
-    public ShortestPathGAIslandParallel(int[][] graph) {
-        this(graph, new ForkJoinPool(NUM_ISLANDS*2));
     }
 
     public List<Integer> findShortestPath() {
@@ -86,12 +81,11 @@ public class ShortestPathGAIslandParallel {
         return fitness;
     }
 
-    // Оновлений статичний метод run, який приймає кількість потоків
     public static List<Integer> run(int[][] graph, int numThreads) {
         ForkJoinPool customPool = new ForkJoinPool(numThreads);
         ShortestPathGAIslandParallel ga = new ShortestPathGAIslandParallel(graph, customPool);
         List<Integer> shortestPath = ga.findShortestPath();
-        customPool.shutdown(); // Важливо вимкнути пул після використання
+        customPool.shutdown();
 
         //System.out.println("Fitness (threads: " + numThreads + "): " + ga.calculateFitness(shortestPath, graph));
         //System.out.println("Shortest path (threads: " + numThreads + "): " + shortestPath);
@@ -103,8 +97,4 @@ public class ShortestPathGAIslandParallel {
         return shortestPath;
     }
 
-    // Залишаємо існуючий статичний метод run для сумісності (використовує NUM_ISLANDS потоків)
-    public static List<Integer> run(int[][] graph) {
-        return run(graph, NUM_ISLANDS*2);
-    }
 }

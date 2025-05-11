@@ -1,4 +1,4 @@
-package org.example.old_versions.parallel_old.paralellOperations;
+package org.example.old_versions.paralellOperations;
 
 import java.util.ArrayList;
 import java.util.Comparator;

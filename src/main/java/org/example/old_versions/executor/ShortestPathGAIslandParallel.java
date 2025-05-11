@@ -1,4 +1,4 @@
-package org.example.old_versions.parallel_old.executor;
+package org.example.old_versions.executor;
 
 
 import org.example.graph.GraphVisualizer;
@@ -73,7 +73,7 @@ public class ShortestPathGAIslandParallel {
         List<Integer> shortestPath = ga.findShortestPath();
 
         System.out.println("Fitness: " + ga.calculateFitness(shortestPath, graph));
-        //System.out.println("Shortest path: " + shortestPath);
+        System.out.println("Shortest path: " + shortestPath);
 
         if (NUM_NODES <= 20) {
             GraphVisualizer visualizer = new GraphVisualizer(graph);

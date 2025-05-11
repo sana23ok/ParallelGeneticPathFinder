@@ -1,4 +1,4 @@
-package org.example.old_versions.parallel_old.executor;
+package org.example.old_versions.executor;
 
 import org.example.Island;
 

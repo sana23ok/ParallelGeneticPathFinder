@@ -106,19 +106,19 @@ public class IslandParallel extends Island {
         });
     }
 
-    @Override
-    protected int calculateFitness(List<Integer> path) {
-        if (fitnessCache.containsKey(path)) {
-            return fitnessCache.get(path);
-        }
-
-        int fitness = 0;
-        for (int i = 0; i < path.size() - 1; i++) {
-            fitness += graph[path.get(i)][path.get(i + 1)];
-        }
-
-        fitnessCache.put(path, fitness); // ← ЦЕ ВАЖЛИВО!
-        return fitness;
-    }
+//    @Override
+//    protected int calculateFitness(List<Integer> path) {
+//        if (fitnessCache.containsKey(path)) {
+//            return fitnessCache.get(path);
+//        }
+//
+//        int fitness = 0;
+//        for (int i = 0; i < path.size() - 1; i++) {
+//            fitness += graph[path.get(i)][path.get(i + 1)];
+//        }
+//
+//        fitnessCache.put(path, fitness);
+//        return fitness;
+//    }
 
 }

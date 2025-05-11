@@ -1,5 +1,7 @@
 package org.example.parallel.executor_version;
 
+import org.example.graph.GraphVisualizer;
+
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -15,10 +17,7 @@ public class ShortestPathGAIslandParallel {
     public List<Integer> findShortestPathParallel(int threadsNum) {
         ExecutorService islandExecutor = Executors.newFixedThreadPool(threadsNum);
 
-        //List<IslandParallel> islands = new ArrayList<>(Collections.nCopies(NUM_ISLANDS, null));
-
-        // Створення островів (все ще паралельно)
-
+        // Створення островів
         List<IslandParallel> islands = new ArrayList<>();
 
         for (int i = 0; i < NUM_ISLANDS; i++) {
@@ -70,6 +69,12 @@ public class ShortestPathGAIslandParallel {
 
         //System.out.println("Fitness (Parallel): " + ga.calculateFitness(shortestPath, graph));
         //System.out.println("Shortest path (Parallel): " + shortestPath);
+
+        if (NUM_NODES <= 20) {
+            GraphVisualizer visualizer = new GraphVisualizer(graph);
+            visualizer.showGraph(shortestPath);
+        }
+
         return shortestPath;
     }
 

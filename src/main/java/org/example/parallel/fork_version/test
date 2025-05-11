@@ -1,4 +1,4 @@
-package org.example.old_versions.parallel_old.fork_version;
+package org.example.parallel.fork_version;
 
 import org.example.Island;
 
@@ -126,7 +126,7 @@ public class IslandParallel extends Island {
 
 
 
-package org.example.old_versions.parallel_old.fork_version;
+package org.example.parallel.fork_version;
 
 import org.example.Constants;
 import org.example.graph.GraphVisualizer;
@@ -168,11 +168,6 @@ public class ShortestPathGAIslandParallel {
         ParallelExecutor.runInCustomPool(forkJoinPool, () ->
                 islands.parallelStream().forEach(IslandParallel::initializePopulation)
         );
-    }
-
-    // Конструктор за замовчуванням (використовує NUM_ISLANDS*2 потоків)
-    public ShortestPathGAIslandParallel(int[][] graph) {
-        this(graph, new ForkJoinPool(NUM_ISLANDS*2));
     }
 
     public List<Integer> findShortestPath() {
@@ -221,8 +216,8 @@ public class ShortestPathGAIslandParallel {
         List<Integer> shortestPath = ga.findShortestPath();
         customPool.shutdown(); // Важливо вимкнути пул після використання
 
-        System.out.println("Fitness (threads: " + numThreads + "): " + ga.calculateFitness(shortestPath, graph));
-        System.out.println("Shortest path (threads: " + numThreads + "): " + shortestPath);
+        //System.out.println("Fitness (threads: " + numThreads + "): " + ga.calculateFitness(shortestPath, graph));
+        //System.out.println("Shortest path (threads: " + numThreads + "): " + shortestPath);
 
         if (NUM_NODES <= 20) {
             GraphVisualizer visualizer = new GraphVisualizer(graph);
@@ -231,8 +226,4 @@ public class ShortestPathGAIslandParallel {
         return shortestPath;
     }
 
-    // Залишаємо існуючий статичний метод run для сумісності (використовує NUM_ISLANDS потоків)
-    public static List<Integer> run(int[][] graph) {
-        return run(graph, NUM_ISLANDS*2);
-    }
 }

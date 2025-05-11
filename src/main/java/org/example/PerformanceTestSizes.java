@@ -8,7 +8,7 @@ import static org.example.graph.GraphUtils.*;
 public class PerformanceTestSizes {
     private static final int[] THREAD_COUNTS = {12}; // Кількість потоків
     private static final int[] GRAPH_SIZES = {500, 2000, 4000, 8000, 10000}; // Кількість вузлів у графі
-    private static final int NUM_ITERATIONS = 10; // Кількість ітерацій для усереднення
+    private static final int NUM_ITERATIONS = 2; // Кількість ітерацій для усереднення
 
     public static void main(String[] args) {
         String filename = "graph.txt";

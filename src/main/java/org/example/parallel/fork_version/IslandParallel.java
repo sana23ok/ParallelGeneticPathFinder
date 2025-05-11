@@ -1,13 +1,12 @@
 package org.example.parallel.fork_version;
 
 import org.example.Island;
-
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
 import static org.example.Constants.*;
+
 
 public class IslandParallel extends Island {
 
@@ -51,11 +50,9 @@ public class IslandParallel extends Island {
 
     @Override
     public void evolve() {
-        //System.out.println("evolve() child creation in " + Thread.currentThread().getName());
-        //System.out.println("Island " + this + " running in " + Thread.currentThread().getName());
-        List<List<Integer>> nextGeneration = new CopyOnWriteArrayList<>();
-
         evaluatePopulation();
+
+        List<List<Integer>> nextGeneration = new CopyOnWriteArrayList<>();
 
         try {
             pool.submit(() ->
@@ -76,11 +73,10 @@ public class IslandParallel extends Island {
             throw new RuntimeException("evolve failed", e);
         }
 
-        synchronized (population) {
-            population.clear();
-            population.addAll(nextGeneration);
-        }
+        // Заміна старої популяції новою без synchronized
+        population = nextGeneration;
     }
+
 
     @Override
     protected void evaluatePopulation() {
@@ -105,8 +101,8 @@ public class IslandParallel extends Island {
     public List<List<Integer>> getBestIndividuals(int count) {
         try {
             return pool.submit(() ->
-                    population.parallelStream()
-                            .sorted(Comparator.comparingInt(this::calculateFitness))//sorted блокуюча?
+                    population.stream()
+                            .sorted(Comparator.comparingInt(this::calculateFitness)) //не паралелим, бо sorted блокуюча
                             .limit(count)
                             .collect(Collectors.toList())
             ).get();
@@ -115,6 +111,7 @@ public class IslandParallel extends Island {
             throw new RuntimeException("getBestIndividuals failed", e);
         }
     }
+
 
     public void addMigrants(List<List<Integer>> migrants) {
         for (List<Integer> migrant : migrants) {

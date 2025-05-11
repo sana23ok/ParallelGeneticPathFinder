@@ -1,4 +1,4 @@
-package org.example.old_versions.parallel_old.paralellOperations;
+package org.example.old_versions.paralellOperations;
 
 import org.example.graph.GraphPathChecker;
 import org.example.sequential.ShortestPathGAIslandSequential;
